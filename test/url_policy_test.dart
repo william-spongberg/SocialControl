@@ -114,10 +114,7 @@ void main() {
     test('keeps allowed hosts inside the app', () {
       expect(decide('https://accountscenter.instagram.com/'), isA<NavAllow>());
       expect(decide('https://accounts.google.com/'), isA<NavAllow>());
-      expect(
-        decide('https://accounts.google.com.au/'),
-        isA<NavOpenExternal>(),
-      );
+      expect(decide('https://accounts.google.com.au/'), isA<NavOpenExternal>());
       expect(
         decide('https://appleid.apple.com/auth/authorize'),
         isA<NavAllow>(),
