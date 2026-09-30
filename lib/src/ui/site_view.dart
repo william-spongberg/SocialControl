@@ -168,7 +168,7 @@ class _SiteViewState extends State<SiteView> {
     allowedOriginRules: {for (final host in _rules.hosts) 'https://$host'},
   );
 
-  InAppWebViewSettings _webViewSettings() {
+  InAppWebViewSettings _webViewSettings({bool supportMultipleWindows = true}) {
     final defaultUserAgent = widget.defaultUserAgent;
     return InAppWebViewSettings(
       userAgent:
@@ -187,12 +187,49 @@ class _SiteViewState extends State<SiteView> {
       // Debug builds can be inspected from chrome://inspect (Android) or
       // Safari's Develop menu (iOS) to work on rules. See docs/RULES.md.
       isInspectable: kDebugMode,
-      supportMultipleWindows: false,
-      javaScriptCanOpenWindowsAutomatically: false,
+      supportMultipleWindows: supportMultipleWindows,
+      javaScriptCanOpenWindowsAutomatically: supportMultipleWindows,
     );
   }
 
   // ------------------------------------------------------------ navigation
+
+  Future<bool> _onCreateWindow(
+    InAppWebViewController controller,
+    CreateWindowAction action,
+  ) async {
+    if (!mounted) return false;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => Dialog.fullscreen(
+        child: SafeArea(
+          child: Stack(
+            children: [
+              InAppWebView(
+                windowId: action.windowId,
+                initialSettings: _webViewSettings(
+                  supportMultipleWindows: false,
+                ),
+                shouldOverrideUrlLoading: _shouldOverrideUrlLoading,
+                onCloseWindow: (_) => Navigator.of(dialogContext).pop(),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton.filledTonal(
+                  tooltip: 'Close sign-in',
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  icon: const Icon(Icons.close),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    return true;
+  }
 
   Future<NavigationActionPolicy> _shouldOverrideUrlLoading(
     InAppWebViewController controller,
@@ -474,6 +511,7 @@ class _SiteViewState extends State<SiteView> {
           initialSettings: _webViewSettings(),
           initialUserScripts: UnmodifiableListView([_userScript()]),
           onWebViewCreated: _onWebViewCreated,
+          onCreateWindow: _onCreateWindow,
           shouldOverrideUrlLoading: _shouldOverrideUrlLoading,
           onLoadStart: (_, _) {
             if (_error != null) setState(() => _error = null);
