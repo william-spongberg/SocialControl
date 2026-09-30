@@ -190,7 +190,7 @@ desktop browser: set a mobile user agent (Chrome's device toolbar does
 this), open `m.youtube.com`, and try selectors in the console.
 
 Reddit works without an account. Its app-promotion rules were checked on
-mobile web on 2026-09-30; the remaining Reddit selectors are unverified.
+mobile web; the remaining Reddit selectors are unverified.
 
 ### Instagram checklist (revision 1)
 
@@ -217,7 +217,7 @@ Log in with a username and password, then check:
 - [ ] A post someone sends you from an account you don't follow still opens.
 - [ ] Posting works: new post → pick a photo → share. Also with the
       camera: new post → Camera → take a photo, and it opens in
-      Instagram's editor (needs a full rebuild after 2026-09-30).
+      Instagram's editor (needs a full rebuild).
 - [ ] A link in someone's bio opens in the browser.
 - [ ] No "Open in app" prompts.
 
@@ -226,20 +226,20 @@ If `/explore/search/` isn't a real page on mobile web, change the
 
 ### YouTube checklist (revision 1)
 
-Checked logged out on 2026-09-30 in headless Firefox: the Home and Shorts
-tabs, Shorts in search and on channels, related videos, comments, the
+Checked logged out in headless Firefox: the Home and Shorts tabs, Shorts in
+search and on channels, related videos, comments, the
 Open App button, and the Home, Shorts, channel Shorts and Trending routes.
 Still to check on a device:
 
 - [x] Signing in works: Google accepted the password and 2-Step
-      Verification in the app on 2026-09-30, and YouTube was signed in.
+  Verification in the app, and YouTube was signed in.
 - [ ] The trip back after signing in stays in the app. If any step opens
       the browser instead, find its host (`adb logcat -d | grep
       'act=android.intent.action.VIEW'` shows it) and add it to
       `allowedHosts`.
 - [x] Signed out, YouTube opens on the You page ("You're not signed in",
       with a Sign in button), and so do Home and Subscriptions (checked
-      signed out in headless Firefox, 2026-09-30).
+      signed out in headless Firefox).
 - [ ] Signed in, it opens on Subscriptions, and so does tapping the YouTube
       logo. Signing out from YouTube's own menu lands on the You page. If
       signed in still sends you to the You page, the `session` cookies are

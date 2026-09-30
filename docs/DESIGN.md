@@ -1,6 +1,6 @@
 # SocialControl design
 
-Status: MVP, Instagram, YouTube and Reddit. Written 2026-09-30.
+Status: MVP, Instagram, YouTube and Reddit.
 
 ## Goal
 
@@ -132,8 +132,7 @@ in its next animation frame. It then fires a scroll event: the feed only
 loads more posts when it sees one, and if a whole page of new posts is
 hidden, the page may not grow enough to scroll, so the feed would stall.
 YouTube's lists aren't virtual, so its rules hide items outright: with
-Shorts hidden, search results still load more as you scroll (checked
-2026-09-30).
+Shorts hidden, search results still load more as you scroll.
 
 Path-scoped hide rules are switched by a token list on `<html>`
 (`data-lite-active`), so the stylesheet isn't rebuilt on every navigation.
@@ -175,8 +174,8 @@ redirects in a row with no tap or key press in between).
 - When the engine redirects, it clicks a link to the target if the page has
   one, so the site's router navigates without a reload. Otherwise, for a
   site whose rules set `popstateNavigation` (Instagram), it pushes the URL
-  and fires a popstate event, which that router renders just the same (seen
-  on 2026-09-30 for the feed, search and the inbox). Other sites (YouTube)
+  and fires a popstate event, which that router renders just the same for the
+  feed, search and the inbox. Other sites (YouTube)
   get a full page load.
 - In the inbox, Instagram's mobile site removes its tab bar. A `keep` rule
   has the engine remember the fixed bar from the page before and show a
@@ -195,13 +194,12 @@ taller than it is wide, and lets it turn back on the way out.
 YouTube slides a video's details up into the header's space while
 fullscreen (`slot-open`) and only slides them back as you scroll. With
 suggestions hidden, the watch page is too short to scroll, so the title
-stayed under the video afterwards; a `style` rule cancels the slide
-(seen signed in, 2026-09-30).
+stayed under the video afterwards; a `style` rule cancels the slide.
 
 Android's WebView sometimes leaves
 fullscreen without telling the page: the page keeps its fullscreen element
 (YouTube's player) pinned over everything, `document.exitFullscreen()` never
-answers, and a resize doesn't help (seen on 2026-09-30). So half a second
+answers, and a resize doesn't help. So half a second
 after the WebView reports leaving fullscreen, the app asks the engine to
 check. If the page is still fullscreen, the engine takes the fullscreen
 element out of the document and puts it straight back, which the spec
@@ -230,7 +228,7 @@ reload, which no current site needs.
 **flutter_inappwebview, not webview_flutter.** It provides document-start
 user scripts (Android `addDocumentStartJavaScript`, iOS `WKUserScript`),
 native file upload for posting, history-change callbacks and renderer-crash
-recovery. We use the 6.2.0 beta: 6.1.5, the last stable release (Oct 2024),
+recovery. We use the 6.2.0 beta: 6.1.5, the last stable release,
 references `proguard-android.txt`, which AGP 9 rejects, and Flutter 3.47
 refuses AGP below 8.11.1. If the beta causes trouble, the fallback is 6.1.5
 with AGP pinned to 8.11.x, which Flutter builds with a deprecation warning.
@@ -275,7 +273,7 @@ threads. The bar has a reload button instead.
 
 - **Google could start refusing YouTube sign-in.** It blocks sign-in from
   some embedded browsers ("This browser or app may not be secure"), but on
-  2026-09-30 it accepted a password and a 2-Step Verification prompt in the
+  it accepted a password and a 2-Step Verification prompt in the
   app (Android WebView 154), and YouTube was signed in afterwards, even
   though the WebView names itself "Android WebView" in its client hints.
   That first sign-in's trip back hopped through Google's country domain
@@ -291,7 +289,7 @@ threads. The bar has a reload button instead.
   browser, so that sign-in can't finish in the app.
 - **YouTube ads are best effort.** The ad data is removed from the player
   and videos still play (checked on logged-out mobile web in headless
-  Firefox, 2026-09-30), but YouTube changes its ad delivery often, and ads
+  Firefox), but YouTube changes its ad delivery often, and ads
   stitched into the video stream itself can't be removed this way.
 - **YouTube Home reloads the page.** YouTube's logo and Home tab aren't
   links, so going Home is a full page load of Subscriptions.
@@ -299,7 +297,7 @@ threads. The bar has a reload button instead.
   session. Rules marked `unverified` need checking on a device (see the
   checklists in RULES.md). On Instagram the riskiest assumptions are the
   `/explore/search/` route and the text labels; the `?variant=following`
-  feed works on mobile web (checked on Android, 2026-09-30). On YouTube,
+  feed works on mobile web (checked on Android). On YouTube,
   the logged-in pages are unchecked: Shorts in the Subscriptions feed, the
   Subscriptions tab, and feed ads.
 - **The inbox's tab bar is a copy.** It is taken from the page before, so
@@ -337,7 +335,7 @@ threads. The bar has a reload button instead.
   JSON and page globals, live config updates and the bridge queue.
 - Not automated: the real sites. Use the device checklists in RULES.md. The
   YouTube rules were also checked on logged-out `m.youtube.com` in headless
-  Firefox with a mobile user agent (2026-09-30): the engine and rules
+  Firefox with a mobile user agent: the engine and rules
   together redirected Home, Shorts and Trending, hid the Home and Shorts
   tabs, Shorts in search and on channels, related videos and comments,
   removed autoplay, end-screen and ad data, and kept videos playing and
@@ -345,4 +343,3 @@ threads. The bar has a reload button instead.
 
 ## Roadmap
 
-See [TODO.md](../TODO.md).

@@ -14,7 +14,6 @@ the bar at the top switches between them.
 - **Reddit**: no Popular or All feeds, no promoted or recommended posts, and
   no sign-in required. Subreddits, posts, search and optional Reddit sign-in
   still work.
-
 The filters are data in `assets/rules/` (one file per site), applied by a
 script the app injects into the page, so a fix for a site change can ship
 without an app release.
@@ -24,7 +23,14 @@ without an app release.
 
 Status: MVP. Most filter rules have not yet been checked against a logged-in
 session; start with the checklists in docs/RULES.md. Signing in to YouTube
-inside the app works (checked 2026-09-30).
+inside the app works.
+
+## Screenshots
+
+The picker screenshot is from the local Flutter web app on this laptop and
+contains no personal account data.
+
+![SocialControl site picker](docs/screenshots/site-picker.png)
 
 ## Run it
 
@@ -74,6 +80,14 @@ with `adb` and any DevTools client, to see why a rule does or doesn't match.
 flutter test                              # app logic and the bundled rules
 (cd test/js && npm install && npm test)   # the injected engine, in jsdom (Node 22.22+)
 ```
+
+For the local quality checks, use `make check`. It runs the Dart formatter in
+check mode, `flutter analyze`, and the Flutter test suite. `make format` applies
+formatting; `make lint` runs the analyzer alone.
+
+## Releases
+
+The first Android build is available as [v0.1](https://github.com/william-spongberg/SocialControl/releases/tag/v0.1).
 
 ## Project layout
 
