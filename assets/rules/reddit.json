@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "platform": "reddit",
-  "revision": 2,
+  "revision": 3,
   "updated": "2026-09-30",
-  "notes": "Public Reddit mobile web needs no sign-in, but normal Reddit sign-in remains available. App-promotion hooks were checked on mobile web 2026-09-30; other selectors are unverified against future site changes.",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. Public Reddit mobile web needs no sign-in, but normal Reddit sign-in remains available. App-promotion hooks were checked on mobile web 2026-09-30; other selectors are unverified against future site changes.",
   "startUrl": "https://www.reddit.com/",
   "hosts": [
     "reddit.com",
@@ -18,6 +18,10 @@
   ],
   "linkShims": [],
   "userAgent": "browser",
+  "session": {
+    "cookies": ["reddit_session", "token_v2"],
+    "note": "Reddit session cookies used to distinguish signed-in mobile web sessions."
+  },
   "features": [
     {
       "id": "hideDiscoveryFeeds",
@@ -25,6 +29,13 @@
       "description": "Blocks Popular, All and Reddit's other discovery feeds while leaving subreddits and direct posts available.",
       "enabledByDefault": true,
       "routes": [
+        {
+          "match": "^/(?!login(?:/|$)).*$",
+          "action": "redirect",
+          "to": "/login/",
+          "signedOut": true,
+          "note": "Reddit discovery and content pages are unavailable until the user signs in."
+        },
         {
           "match": "^/(?:r/(?:popular|all)(?:/[^?]*)?|(?:popular|all)/?)(?:\\?.*)?$",
           "action": "block",
