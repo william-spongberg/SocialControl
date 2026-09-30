@@ -58,6 +58,19 @@ void main() {
     });
   }
 
+  test('every bundled site hides app prompts by default', () {
+    for (final site in siteCatalog) {
+      final rules = _bundled(site.platform);
+      final prompts = rules.features.firstWhere(
+        (feature) => feature.id == 'hideAppPrompts',
+        orElse: () =>
+            throw StateError('${site.platform} has no hideAppPrompts feature'),
+      );
+      expect(prompts.enabledByDefault, isTrue, reason: site.platform);
+      expect(prompts.hide, isNotEmpty, reason: site.platform);
+    }
+  });
+
   group('bundled Instagram rules', () {
     final rules = _bundled('instagram');
     final resolver = _defaults(rules);
@@ -104,10 +117,20 @@ void main() {
     test('send Explore to search, and home to the Following feed', () {
       expect(resolver.resolve('/explore/').path, '/explore/search/');
       expect(resolver.resolve('/explore/tags/cats/').blockedLabel, isNotNull);
-      expect(resolver.resolve('/').path, '/?variant=following');
+      expect(resolver.resolve('/', signedIn: true).path, '/?variant=following');
+      expect(resolver.resolve('/', signedIn: false).path, '/accounts/login/');
       // Where Instagram lands after logging in.
-      expect(resolver.resolve('/?deoia=1').path, '/?variant=following');
+      expect(
+        resolver.resolve('/?deoia=1', signedIn: true).path,
+        '/?variant=following',
+      );
       expect(resolver.resolve('/?variant=favorites').changed, isFalse);
+    });
+
+    test('uses a page-readable cookie to identify signed-in users', () {
+      expect(rules.session?.cookies, contains('ds_user_id'));
+      expect(rules.isSignedIn({'ds_user_id'}), isTrue);
+      expect(rules.isSignedIn(const {}), isFalse);
     });
 
     test('collapse whole posts instead of removing them', () {
@@ -249,10 +272,6 @@ void main() {
       final policy = UrlPolicy(rules, _defaults(rules));
       for (final url in [
         'https://accounts.google.com/v3/signin/identifier?service=youtube',
-        // Google sets cookies on the user's country domain on the way back.
-        'https://accounts.google.com.au/accounts/SetSID?continue=x',
-        'https://accounts.google.co.uk/accounts/SetSID?continue=x',
-        'https://accounts.google.de/accounts/SetSID?continue=x',
         'https://accounts.youtube.com/accounts/SetSID?continue=x',
         'https://www.youtube.com/signin?action_handle_signin=true',
       ]) {
@@ -262,7 +281,7 @@ void main() {
           reason: url,
         );
       }
-      // Exact hosts only: lookalikes still open in the browser.
+      // Country-specific hosts and lookalikes stay outside the app for now.
       for (final url in [
         'https://accounts.google.com.evil.example/',
         'https://accounts.google.co.xyz/',
@@ -281,13 +300,11 @@ void main() {
       () {
         final rules = _bundled('youtube');
         final resolver = _defaults(rules);
-        for (final path in ['/', '/feed/subscriptions']) {
-          expect(
-            resolver.resolve(path, signedIn: false).path,
-            '/feed/library',
-            reason: path,
-          );
-        }
+        expect(resolver.resolve('/', signedIn: false).path, '/feed/library');
+        expect(
+          resolver.resolve('/feed/subscriptions', signedIn: false).path,
+          '/feed/library',
+        );
         expect(resolver.resolve('/').path, '/feed/subscriptions');
         // Signed out, the rest of YouTube still works.
         for (final path in [
@@ -350,11 +367,16 @@ void main() {
     final rules = _bundled('reddit');
     final resolver = _defaults(rules);
 
-    test('works without sign-in and leaves sign-in available', () {
-      expect(rules.session, isNull);
-      expect(rules.isSignedIn(const {}), isTrue);
-      expect(resolver.resolve('/').changed, isFalse);
-      expect(resolver.resolve('/r/programming/').changed, isFalse);
+    test('sends signed-out users to login before any content', () {
+      expect(rules.session, isNotNull);
+      expect(rules.isSignedIn(const {}), isFalse);
+      expect(resolver.resolve('/', signedIn: false).path, '/login/');
+      expect(
+        resolver.resolve('/r/programming/', signedIn: false).path,
+        '/login/',
+      );
+      expect(resolver.resolve('/login/', signedIn: false).changed, isFalse);
+      expect(resolver.resolve('/', signedIn: true).changed, isFalse);
       expect(resolver.resolve('/login/').changed, isFalse);
 
       final policy = UrlPolicy(rules, resolver);
