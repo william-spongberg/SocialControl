@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 1,
+  "platform": "youtube",
+  "revision": 1,
+  "updated": "2026-09-30",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. m.youtube.com renders custom elements (ytm-*, *-view-model) whose names are stable across builds, unlike its class names. 'checked 2026-09-30' means the selector or path was seen on logged-out mobile web on that date; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). allowedHosts ends with accounts.google.<domain> for every domain in https://www.google.com/supported_domains (fetched 2026-09-30): after you sign in, Google sets its cookies on your country's domain too (accounts.google.com.au in Australia) on the way back to YouTube, and that hop must stay in the app. Exact hosts rather than a pattern, so no lookalike domain can load where the app shows no address bar.",
+  "startUrl": "https://m.youtube.com/",
+  "hosts": [
+    "youtube.com",
+    "www.youtube.com",
+    "m.youtube.com",
+    "youtu.be"
+  ],
+  "allowedHosts": [
+    "accounts.google.com",
+    "accounts.youtube.com",
+    "myaccount.google.com",
+    "gds.google.com",
+    "consent.youtube.com",
+    "consent.google.com",
+    "accounts.google.ad",
+    "accounts.google.ae",
+    "accounts.google.com.af",
+    "accounts.google.com.ag",
+    "accounts.google.al",
+    "accounts.google.am",
+    "accounts.google.co.ao",
+    "accounts.google.com.ar",
+    "accounts.google.as",
+    "accounts.google.at",
+    "accounts.google.com.au",
+    "accounts.google.az",
+    "accounts.google.ba",
+    "accounts.google.com.bd",
+    "accounts.google.be",
+    "accounts.google.bf",
+    "accounts.google.bg",
+    "accounts.google.com.bh",
+    "accounts.google.bi",
+    "accounts.google.bj",
+    "accounts.google.com.bn",
+    "accounts.google.com.bo",
+    "accounts.google.com.br",
+    "accounts.google.bs",
+    "accounts.google.bt",
+    "accounts.google.co.bw",
+    "accounts.google.by",
+    "accounts.google.com.bz",
+    "accounts.google.ca",
+    "accounts.google.cd",
+    "accounts.google.cf",
+    "accounts.google.cg",
+    "accounts.google.ch",
+    "accounts.google.ci",
+    "accounts.google.co.ck",
+    "accounts.google.cl",
+    "accounts.google.cm",
+    "accounts.google.cn",
+    "accounts.google.com.co",
+    "accounts.google.co.cr",
+    "accounts.google.com.cu",
+    "accounts.google.cv",
+    "accounts.google.com.cy",
+    "accounts.google.cz",
+    "accounts.google.de",
+    "accounts.google.dj",
+    "accounts.google.dk",
+    "accounts.google.dm",
+    "accounts.google.com.do",
+    "accounts.google.dz",
+    "accounts.google.com.ec",
+    "accounts.google.ee",
+    "accounts.google.com.eg",
+    "accounts.google.es",
+    "accounts.google.com.et",
+    "accounts.google.fi",
+    "accounts.google.com.fj",
+    "accounts.google.fm",
+    "accounts.google.fr",
+    "accounts.google.ga",
+    "accounts.google.ge",
+    "accounts.google.gg",
+    "accounts.google.com.gh",
+    "accounts.google.com.gi",
+    "accounts.google.gl",
+    "accounts.google.gm",
+    "accounts.google.gr",
+    "accounts.google.com.gt",
+    "accounts.google.gy",
+    "accounts.google.com.hk",
+    "accounts.google.hn",
+    "accounts.google.hr",
+    "accounts.google.ht",
+    "accounts.google.hu",
+    "accounts.google.co.id",
+    "accounts.google.ie",
+    "accounts.google.co.il",
+    "accounts.google.im",
+    "accounts.google.co.in",
+    "accounts.google.iq",
+    "accounts.google.is",
+    "accounts.google.it",
+    "accounts.google.je",
+    "accounts.google.com.jm",
+    "accounts.google.jo",
+    "accounts.google.co.jp",
+    "accounts.google.co.ke",
+    "accounts.google.com.kh",
+    "accounts.google.ki",
+    "accounts.google.kg",
+    "accounts.google.co.kr",
+    "accounts.google.com.kw",
+    "accounts.google.kz",
+    "accounts.google.la",
+    "accounts.google.com.lb",
+    "accounts.google.li",
+    "accounts.google.lk",
+    "accounts.google.co.ls",
+    "accounts.google.lt",
+    "accounts.google.lu",
+    "accounts.google.lv",
+    "accounts.google.com.ly",
+    "accounts.google.co.ma",
+    "accounts.google.md",
+    "accounts.google.me",
+    "accounts.google.mg",
+    "accounts.google.mk",
+    "accounts.google.ml",
+    "accounts.google.com.mm",
+    "accounts.google.mn",
+    "accounts.google.com.mt",
+    "accounts.google.mu",
+    "accounts.google.mv",
+    "accounts.google.mw",
+    "accounts.google.com.mx",
+    "accounts.google.com.my",
+    "accounts.google.co.mz",
+    "accounts.google.com.na",
+    "accounts.google.com.ng",
+    "accounts.google.com.ni",
+    "accounts.google.ne",
+    "accounts.google.nl",
+    "accounts.google.no",
+    "accounts.google.com.np",
+    "accounts.google.nr",
+    "accounts.google.nu",
+    "accounts.google.co.nz",
+    "accounts.google.com.om",
+    "accounts.google.com.pa",
+    "accounts.google.com.pe",
+    "accounts.google.com.pg",
+    "accounts.google.com.ph",
+    "accounts.google.com.pk",
+    "accounts.google.pl",
+    "accounts.google.pn",
+    "accounts.google.com.pr",
+    "accounts.google.ps",
+    "accounts.google.pt",
+    "accounts.google.com.py",
+    "accounts.google.com.qa",
+    "accounts.google.ro",
+    "accounts.google.ru",
+    "accounts.google.rw",
+    "accounts.google.com.sa",
+    "accounts.google.com.sb",
+    "accounts.google.sc",
+    "accounts.google.se",
+    "accounts.google.com.sg",
+    "accounts.google.sh",
+    "accounts.google.si",
+    "accounts.google.sk",
+    "accounts.google.com.sl",
+    "accounts.google.sn",
+    "accounts.google.so",
+    "accounts.google.sm",
+    "accounts.google.sr",
+    "accounts.google.st",
+    "accounts.google.com.sv",
+    "accounts.google.td",
+    "accounts.google.tg",
+    "accounts.google.co.th",
+    "accounts.google.com.tj",
+    "accounts.google.tl",
+    "accounts.google.tm",
+    "accounts.google.tn",
+    "accounts.google.to",
+    "accounts.google.com.tr",
+    "accounts.google.tt",
+    "accounts.google.com.tw",
+    "accounts.google.co.tz",
+    "accounts.google.com.ua",
+    "accounts.google.co.ug",
+    "accounts.google.co.uk",
+    "accounts.google.com.uy",
+    "accounts.google.co.uz",
+    "accounts.google.com.vc",
+    "accounts.google.co.ve",
+    "accounts.google.co.vi",
+    "accounts.google.com.vn",
+    "accounts.google.vu",
+    "accounts.google.ws",
+    "accounts.google.rs",
+    "accounts.google.co.za",
+    "accounts.google.co.zm",
+    "accounts.google.co.zw",
+    "accounts.google.cat"
+  ],
+  "linkShims": [
+    {
+      "host": "www.youtube.com",
+      "path": "/redirect",
+      "param": "q"
+    },
+    {
+      "host": "m.youtube.com",
+      "path": "/redirect",
+      "param": "q"
+    },
+    {
+      "host": "youtube.com",
+      "path": "/redirect",
+      "param": "q"
+    }
+  ],
+  "userAgent": "browser",
+  "session": {
+    "cookies": [
+      "SAPISID",
+      "__Secure-3PAPISID"
+    ],
+    "note": "Cookies YouTube sets while you're signed in and page scripts can read (not HttpOnly), seen in a signed-in session on 2026-09-30. Routes marked signedOut apply when none is set."
+  },
+  "features": [
+    {
+      "id": "subscriptionsHome",
+      "title": "Subscriptions as Home",
+      "description": "Home shows the latest videos from channels you subscribe to, instead of recommendations. Signed out, it shows the page where you sign in.",
+      "enabledByDefault": true,
+      "routes": [
+        {
+          "match": "^/(?:\\?.*)?$",
+          "action": "redirect",
+          "to": "/feed/subscriptions",
+          "note": "The recommended feed, including variants such as /?app=m."
+        },
+        {
+          "match": "^/feed/subscriptions(?:[/?]|$)",
+          "action": "redirect",
+          "to": "/feed/library",
+          "signedOut": true,
+          "note": "Signed out, Subscriptions is blank. The You tab's page says you aren't signed in and has YouTube's Sign in button. Checked on logged-out mobile web, 2026-09-30."
+        }
+      ],
+      "hide": [
+        {
+          "selector": "ytm-pivot-bar-item-renderer:has(> .pivot-w2w)",
+          "note": "The Home tab in the bottom bar (w2w is \"what to watch\"). Checked 2026-09-30."
+        }
+      ]
+    },
+    {
+      "id": "hideShorts",
+      "title": "Hide Shorts",
+      "description": "Removes the Shorts tab and Shorts in feeds, search and channels. A Short someone sends you plays as a normal video, without the endless Shorts feed.",
+      "enabledByDefault": true,
+      "routes": [
+        {
+          "match": "^/shorts/([A-Za-z0-9_-]+)",
+          "action": "redirect",
+          "to": "/watch?v=$1",
+          "note": "A single Short opens in the normal player, where there is nothing to swipe to. /watch?v= renders a Short as a normal video: checked 2026-09-30."
+        },
+        {
+          "match": "^/shorts/?(?:\\?.*)?$",
+          "action": "block",
+          "to": "/feed/subscriptions",
+          "label": "Shorts"
+        },
+        {
+          "match": "^/(@[^/?]+|channel/[^/?]+|c/[^/?]+|user/[^/?]+)/shorts/?(?:\\?.*)?$",
+          "action": "redirect",
+          "to": "/$1/videos",
+          "note": "A channel's Shorts tab goes to its Videos tab."
+        }
+      ],
+      "hide": [
+        {
+          "selector": "ytm-pivot-bar-item-renderer:has(> .pivot-shorts)",
+          "note": "The Shorts tab in the bottom bar. Checked 2026-09-30."
+        },
+        {
+          "selector": "ytm-reel-shelf-renderer",
+          "note": "Shorts shelves, e.g. on channel pages. Checked 2026-09-30."
+        },
+        {
+          "selector": "grid-shelf-view-model:has(ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2)",
+          "note": "Shorts grids in search results. Checked 2026-09-30."
+        },
+        {
+          "selector": "ytm-rich-section-renderer:has(ytm-reel-shelf-renderer, ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2)",
+          "note": "The feed section around a Shorts shelf, so no gap is left. unverified"
+        },
+        {
+          "selector": "ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2, ytm-reel-item-renderer",
+          "note": "Single Shorts tiles anywhere. The first checked 2026-09-30; the others are older and newer forms from community filter lists."
+        },
+        {
+          "selector": ":is(ytm-video-with-context-renderer, ytm-rich-item-renderer, ytm-compact-video-renderer):has(a[href^=\"/shorts/\"])",
+          "note": "A Short shown as an ordinary video row, e.g. in Subscriptions. unverified"
+        },
+        {
+          "selector": "yt-tab-shape[tab-title=\"Shorts\"]",
+          "note": "A channel's Shorts tab. The label is \"Shorts\" in most languages. Checked 2026-09-30."
+        }
+      ]
+    },
+    {
+      "id": "hideRelated",
+      "title": "Hide suggested videos",
+      "description": "Hides the recommended videos under the video you're watching, the suggestions at the end of a video, and autoplay of the next one.",
+      "enabledByDefault": true,
+      "hide": [
+        {
+          "selector": ".related-items-container, ytm-item-section-renderer[section-identifier=\"related-items\"]",
+          "note": "The recommendations under the player; the comments section is separate. Checked 2026-09-30."
+        },
+        {
+          "selector": "ytm-search ytm-shelf-renderer",
+          "note": "Shelves such as \"People also watched\" between search results. unverified"
+        }
+      ],
+      "style": [
+        {
+          "selector": ".related-chips-slot-wrapper.slot-open",
+          "css": "transform: none",
+          "note": "Fullscreen makes YouTube slide the video's details up into the header's space (slot-open), and it only slides them back as you scroll. With the suggestions hidden, the watch page is too short to scroll, so after fullscreen the title stayed under the video. Seen signed in on 2026-09-30; YouTube only builds this wrapper for signed-in viewers."
+        }
+      ],
+      "prune": [
+        {
+          "path": "contents.singleColumnWatchNextResults.autoplay",
+          "note": "The next video that autoplay would play. Path checked 2026-09-30; the effect on playback is unverified."
+        },
+        {
+          "path": "playerOverlays.playerOverlayRenderer.autoplay",
+          "note": "The \"Up next\" countdown at the end of a video. Path checked 2026-09-30; effect unverified."
+        },
+        {
+          "path": "playerOverlays.playerOverlayRenderer.endScreen",
+          "note": "The grid of suggested videos at the end of a video. Path checked 2026-09-30; effect unverified."
+        }
+      ]
+    },
+    {
+      "id": "hideExplore",
+      "title": "Block Explore and Trending",
+      "description": "Blocks the Trending and Explore pages, and gaming and hashtag feeds. Search still works.",
+      "enabledByDefault": true,
+      "routes": [
+        {
+          "match": "^/feed/(?:trending|explore)(?:[/?]|$)",
+          "action": "block",
+          "to": "/feed/subscriptions",
+          "label": "Explore"
+        },
+        {
+          "match": "^/(?:gaming|playables)(?:[/?]|$)",
+          "action": "block",
+          "to": "/feed/subscriptions",
+          "label": "Explore"
+        },
+        {
+          "match": "^/hashtag/",
+          "action": "block",
+          "to": "/feed/subscriptions",
+          "label": "Hashtag feeds",
+          "note": "Video descriptions link hashtags here (checked 2026-09-30)."
+        }
+      ]
+    },
+    {
+      "id": "hideAds",
+      "title": "Hide ads",
+      "description": "Removes ads before and during videos where it can, and hides ads in feeds, in search and under videos.",
+      "enabledByDefault": true,
+      "hide": [
+        {
+          "selector": "ytm-companion-slot",
+          "note": "The ad slot between the player and the video's title. Present, empty, when logged out: checked 2026-09-30."
+        },
+        {
+          "selector": "ytm-promoted-sparkles-web-renderer, ytm-promoted-sparkles-text-search-renderer, ytm-promoted-video-renderer, ytm-companion-ad-renderer, ytm-display-ad-renderer, ytm-ad-slot-renderer, ad-slot-renderer, ytm-in-feed-ad-layout-renderer, ytm-statement-banner-renderer, ytm-brand-video-singleton-renderer, ytm-merch-shelf-renderer",
+          "note": "Ad and merchandise renderers named in community filter lists (uBlock Origin, AdGuard). unverified"
+        },
+        {
+          "selector": "ytm-rich-item-renderer:has(ytm-ad-slot-renderer, ad-slot-renderer, ytm-promoted-sparkles-web-renderer)",
+          "note": "The feed item around an ad, so no gap is left. Not ytm-item-section-renderer: search puts every result in one. unverified"
+        }
+      ],
+      "prune": [
+        {
+          "path": "adPlacements",
+          "note": "Video ads in the player data that page navigations fetch (/youtubei/v1/player). Paths from uBlock Origin's filters. unverified"
+        },
+        {
+          "path": "playerAds"
+        },
+        {
+          "path": "adSlots"
+        },
+        {
+          "path": "playerResponse.adPlacements"
+        },
+        {
+          "path": "playerResponse.playerAds"
+        },
+        {
+          "path": "playerResponse.adSlots"
+        },
+        {
+          "path": "adPlacements",
+          "global": "ytInitialPlayerResponse",
+          "note": "The same data on a full page load, where the page assigns it to this global as a script literal instead of parsing JSON (checked 2026-09-30)."
+        },
+        {
+          "path": "playerAds",
+          "global": "ytInitialPlayerResponse"
+        },
+        {
+          "path": "adSlots",
+          "global": "ytInitialPlayerResponse"
+        }
+      ]
+    },
+    {
+      "id": "hideComments",
+      "title": "Hide comments",
+      "description": "Hides the comments under videos.",
+      "enabledByDefault": false,
+      "hide": [
+        {
+          "selector": "yt-video-metadata-carousel-view-model:has(comments-entry-point-teaser-view-model), ytm-comments-entry-point-header-renderer",
+          "note": "The comments preview under the video, which opens the comments. The first checked 2026-09-30; the second is an older form."
+        }
+      ]
+    },
+    {
+      "id": "hideAppPrompts",
+      "title": "Hide \"Open app\" and Premium prompts",
+      "description": "Hides buttons and banners that push you to the YouTube app or to YouTube Premium.",
+      "enabledByDefault": true,
+      "hide": [
+        {
+          "selector": "ytm-button-renderer:has(> a[href^=\"intent:\"]), a[href^=\"intent:\"], a[href^=\"vnd.youtube:\"], a[href*=\"play.google.com/store/apps\"], a[href*=\"apps.apple.com\"]",
+          "note": "The Open App button on the watch page (checked 2026-09-30). The app never opens intent: or vnd.youtube: links whatever this setting is; this only hides them."
+        },
+        {
+          "selector": "ytm-mealbar-promo-renderer",
+          "note": "Promotions that slide up from the bottom, such as YouTube Premium offers. unverified"
+        }
+      ]
+    }
+  ]
+}

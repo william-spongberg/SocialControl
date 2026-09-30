@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Where the WebView plugin saves photos and videos taken for a file input:
+     the app's own folder in external storage (getExternalFilesDir(null)).
+     Used by the provider in AndroidManifest.xml. -->
+<paths>
+    <external-files-path name="captures" path="." />
+</paths>

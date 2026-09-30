@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "platform": "reddit",
+  "revision": 2,
+  "updated": "2026-09-30",
+  "notes": "Public Reddit mobile web needs no sign-in, but normal Reddit sign-in remains available. App-promotion hooks were checked on mobile web 2026-09-30; other selectors are unverified against future site changes.",
+  "startUrl": "https://www.reddit.com/",
+  "hosts": [
+    "reddit.com",
+    "www.reddit.com",
+    "old.reddit.com",
+    "accounts.reddit.com"
+  ],
+  "allowedHosts": [
+    "www.redditstatic.com",
+    "www.redditmedia.com",
+    "preview.redd.it"
+  ],
+  "linkShims": [],
+  "userAgent": "browser",
+  "features": [
+    {
+      "id": "hideDiscoveryFeeds",
+      "title": "Hide discovery feeds",
+      "description": "Blocks Popular, All and Reddit's other discovery feeds while leaving subreddits and direct posts available.",
+      "enabledByDefault": true,
+      "routes": [
+        {
+          "match": "^/(?:r/(?:popular|all)(?:/[^?]*)?|(?:popular|all)/?)(?:\\?.*)?$",
+          "action": "block",
+          "to": "/",
+          "label": "Discovery feeds"
+        }
+      ],
+      "hide": [
+        {
+          "selector": "a[href^=\"/r/popular\"], a[href^=\"/r/all\"], a[href=\"/popular\"], a[href=\"/all\"]"
+        }
+      ]
+    },
+    {
+      "id": "hideAds",
+      "title": "Hide ads",
+      "description": "Hides promoted posts and ad containers from feeds.",
+      "enabledByDefault": true,
+      "hide": [
+        {
+          "selector": "shreddit-ad-post, article:has([data-testid=\"ad-link\"]), [data-testid=\"post-container\"]:has([data-testid=\"ad-link\"])",
+          "collapse": true
+        }
+      ],
+      "hideByText": [
+        {
+          "container": "article",
+          "marker": "span, div",
+          "text": ["Promoted", "Promoted by"],
+          "collapse": true
+        }
+      ]
+    },
+    {
+      "id": "hideRecommendations",
+      "title": "Hide recommendations",
+      "description": "Removes recommended posts and community suggestions from feeds.",
+      "enabledByDefault": true,
+      "hide": [
+        {
+          "selector": "shreddit-recommended-post, shreddit-feed-card[recommendation], article:has([data-testid=\"recommendation-label\"])",
+          "collapse": true
+        }
+      ],
+      "hideByText": [
+        {
+          "container": "article",
+          "marker": "span, div",
+          "text": ["Because you visited", "Recommended for you"],
+          "collapse": true
+        }
+      ]
+    },
+    {
+      "id": "hideAppPrompts",
+      "title": "Hide app prompts",
+      "description": "Removes Reddit's Open App button and the app-promotion popup.",
+      "enabledByDefault": true,
+      "hide": [
+        {
+          "selector": "#xpromo-small-header, #open-app-header-cta, div.configured-xpromo-bottom-sheet",
+          "note": "The top-right Open App control and the bottom-sheet popup, checked on mobile web 2026-09-30."
+        }
+      ]
+    }
+  ]
+}

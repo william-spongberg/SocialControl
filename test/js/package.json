@@ -1,0 +1,12 @@
+{
+  "name": "lite-engine-tests",
+  "private": true,
+  "description": "Tests for assets/js/lite_engine.js, the script the app injects into Instagram.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.1"
+  }
+}
