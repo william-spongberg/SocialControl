@@ -174,10 +174,10 @@ class SiteRules {
   /// one. Otherwise it loads the page in full when it has no link to click.
   final bool popstateNavigation;
 
-  /// Whether the user is signed in, given the names of the cookies set for
-  /// the site. Sites without a [session] count as signed in.
-  bool isSignedIn(Set<String> cookieNames) =>
-      session == null || session!.cookies.any(cookieNames.contains);
+  /// Whether the user is signed in, given the cookies set for the site, by
+  /// name and value. Sites without a [session] count as signed in.
+  bool isSignedIn(Map<String, String> cookies) =>
+      session == null || session!.isSignedIn(cookies);
 
   bool isSiteHost(String host) => hosts.contains(host.toLowerCase());
 
@@ -185,22 +185,82 @@ class SiteRules {
 }
 
 /// How to tell whether the user is signed in to a site: any of [cookies] is
-/// set for its start URL.
+/// set for its start URL, unless it is one of [anonymousTokens].
 ///
-/// The page engine checks `document.cookie`, which leaves out HttpOnly
-/// cookies, so list cookies that page scripts can read.
+/// The app reads the WebView's cookie store, which includes HttpOnly cookies,
+/// and passes its answer to the page engine, so the cookies can be ones page
+/// scripts can't read.
 class Session {
-  Session({required this.cookies});
+  Session({required this.cookies, this.anonymousTokens = const []});
 
   factory Session._fromJson(_Reader r) {
     final cookies = r.strings('cookies');
     if (cookies.isEmpty) {
       throw RulesFormatException('${r.path}cookies: must not be empty');
     }
-    return Session(cookies: cookies);
+    final anonymousTokens = [
+      for (final (i, t)
+          in r.objects('anonymousTokens', required: false).indexed)
+        AnonymousToken._fromJson(_Reader(t, '${r.path}anonymousTokens[$i].')),
+    ];
+    for (final token in anonymousTokens) {
+      if (!cookies.contains(token.cookie)) {
+        throw RulesFormatException(
+          '${r.path}anonymousTokens: "${token.cookie}" is not one of cookies',
+        );
+      }
+    }
+    return Session(cookies: cookies, anonymousTokens: anonymousTokens);
   }
 
   final List<String> cookies;
+
+  /// Session cookies the site also sets for visitors who aren't signed in.
+  final List<AnonymousToken> anonymousTokens;
+
+  bool isSignedIn(Map<String, String> cookies) => this.cookies.any((name) {
+    final value = cookies[name];
+    return value != null &&
+        !anonymousTokens.any((t) => t.cookie == name && t.matches(value));
+  });
+}
+
+/// A session cookie holding a JSON Web Token that the site sets for every
+/// visitor, signed in or not. The token is a visitor's while its payload's
+/// [claim] is [value]: Reddit's `token_v2` has `"sub": "loid"` until you
+/// sign in.
+class AnonymousToken {
+  AnonymousToken({
+    required this.cookie,
+    required this.claim,
+    required this.value,
+  });
+
+  factory AnonymousToken._fromJson(_Reader r) => AnonymousToken(
+    cookie: r.string('cookie'),
+    claim: r.string('claim'),
+    value: r.string('value'),
+  );
+
+  final String cookie;
+  final String claim;
+  final String value;
+
+  /// Whether [token] is a visitor's token. A cookie that isn't a JSON Web
+  /// Token doesn't count as one, so a change in the site's tokens can't
+  /// lock signed-in users out.
+  bool matches(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) return false;
+    try {
+      final payload = jsonDecode(
+        utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+      );
+      return payload is Map && payload[claim] == value;
+    } on FormatException {
+      return false;
+    }
+  }
 }
 
 /// A user-facing filter the user can switch on or off in Settings.

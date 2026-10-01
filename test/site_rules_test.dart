@@ -30,6 +30,13 @@ RouteResolver _defaults(SiteRules rules) => EngineConfig.build(rules, {
     if (f.enabledByDefault) f.id,
 }).resolver;
 
+/// A JSON Web Token with [claims], as a site's cookie holds one.
+String _jwt(Map<String, Object?> claims) {
+  String part(Object? json) =>
+      base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
+  return '${part({'alg': 'RS256', 'typ': 'JWT'})}.${part(claims)}.signature';
+}
+
 void main() {
   for (final site in siteCatalog) {
     group('bundled ${site.platform} rules', () {
@@ -127,10 +134,10 @@ void main() {
       expect(resolver.resolve('/?variant=favorites').changed, isFalse);
     });
 
-    test('uses a page-readable cookie to identify signed-in users', () {
+    test('tell signed in from signed out by the ds_user_id cookie', () {
       expect(rules.session?.cookies, contains('ds_user_id'));
-      expect(rules.isSignedIn({'ds_user_id'}), isTrue);
-      expect(rules.isSignedIn(const {}), isFalse);
+      expect(rules.isSignedIn({'ds_user_id': '123', 'csrftoken': 'x'}), isTrue);
+      expect(rules.isSignedIn({'csrftoken': 'x', 'mid': 'y'}), isFalse);
     });
 
     test('keep Facebook\'s login inside the app', () {
@@ -349,17 +356,22 @@ void main() {
       },
     );
 
-    test('tell signed in from signed out by cookies page scripts can read', () {
+    test('tell signed in from signed out by YouTube\'s session cookies', () {
       final rules = _bundled('youtube');
-      // The cookies of a signed-out and a signed-in session on 2026-09-30.
-      expect(rules.isSignedIn({'YSC', 'VISITOR_INFO1_LIVE', 'PREF'}), isFalse);
+      // The cookies of a signed-out and a signed-in session.
       expect(
-        rules.isSignedIn({'YSC', 'SID', 'SAPISID', '__Secure-3PAPISID'}),
+        rules.isSignedIn({'YSC': 'a', 'VISITOR_INFO1_LIVE': 'b', 'PREF': 'c'}),
+        isFalse,
+      );
+      expect(
+        rules.isSignedIn({
+          'YSC': 'a',
+          'SID': 'b',
+          'SAPISID': 'c',
+          '__Secure-3PAPISID': 'd',
+        }),
         isTrue,
       );
-      // HttpOnly cookies such as LOGIN_INFO are invisible to the engine, so
-      // they must not decide it on the app's side either.
-      expect(rules.session!.cookies, isNot(contains('LOGIN_INFO')));
     });
 
     test(
@@ -416,6 +428,30 @@ void main() {
         isA<NavAllow>(),
       );
     });
+
+    test(
+      'tell signed in from signed out, though every visitor has a token',
+      () {
+        // Reddit sets token_v2 for every visitor; its sub is loid until you
+        // sign in.
+        final visitor = {
+          'loid': 'x',
+          'token_v2': _jwt({'sub': 'loid', 'lid': 't2_x'}),
+        };
+        expect(rules.isSignedIn(visitor), isFalse);
+        expect(rules.isSignedIn(const {}), isFalse);
+        expect(
+          rules.isSignedIn({
+            'token_v2': _jwt({'sub': 'user'}),
+          }),
+          isTrue,
+        );
+        expect(rules.isSignedIn({...visitor, 'reddit_session': 'x'}), isTrue);
+        // A token that can't be read counts, so a change in Reddit's tokens
+        // can't lock signed-in users out.
+        expect(rules.isSignedIn({'token_v2': 'not-a-token'}), isTrue);
+      },
+    );
 
     test('keep Google\'s and Apple\'s sign-in inside the app', () {
       final policy = UrlPolicy(rules, resolver);
@@ -696,8 +732,8 @@ void main() {
       });
       final rules = SiteRules.fromJson(json);
       expect(rules.session!.cookies, ['ds_user_id']);
-      expect(rules.isSignedIn({'ds_user_id'}), isTrue);
-      expect(rules.isSignedIn({'csrftoken'}), isFalse);
+      expect(rules.isSignedIn({'ds_user_id': '1'}), isTrue);
+      expect(rules.isSignedIn({'csrftoken': 'x'}), isFalse);
       expect(rules.features[1].routes.last.signedOut, isTrue);
       expect(rules.features[1].routes.first.signedOut, isFalse);
 
@@ -714,6 +750,42 @@ void main() {
       final plain = SiteRules.parse(rulesJson());
       expect(plain.session, isNull);
       expect(plain.isSignedIn(const {}), isTrue);
+    });
+
+    test('reads anonymous tokens, which must be session cookies', () {
+      final json = _json()
+        ..['session'] = {
+          'cookies': ['session_id', 'token'],
+          'anonymousTokens': [
+            {'cookie': 'token', 'claim': 'sub', 'value': 'guest'},
+          ],
+        };
+      final rules = SiteRules.fromJson(json);
+      final token = rules.session!.anonymousTokens.single;
+      expect(
+        [token.cookie, token.claim, token.value],
+        ['token', 'sub', 'guest'],
+      );
+      expect(
+        rules.isSignedIn({
+          'token': _jwt({'sub': 'guest'}),
+        }),
+        isFalse,
+      );
+      expect(
+        rules.isSignedIn({
+          'token': _jwt({'sub': 'someone'}),
+        }),
+        isTrue,
+      );
+      expect(rules.isSignedIn({'session_id': 'x'}), isTrue);
+
+      ((json['session'] as Map)['anonymousTokens'] as List)[0]['cookie'] =
+          'other';
+      expect(
+        () => SiteRules.fromJson(json),
+        _formatError('session.anonymousTokens: "other" is not one of cookies'),
+      );
     });
 
     test('reads style rules and refuses CSS that could do more than style', () {

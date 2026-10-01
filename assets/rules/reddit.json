@@ -27,7 +27,14 @@
   "userAgent": "browser",
   "session": {
     "cookies": ["reddit_session", "token_v2"],
-    "note": "Reddit session cookies used to distinguish signed-in mobile web sessions."
+    "anonymousTokens": [
+      {
+        "cookie": "token_v2",
+        "claim": "sub",
+        "value": "loid"
+      }
+    ],
+    "note": "Both are HttpOnly, so only the app can read them. reddit_session is only set for some signed-in sessions. Reddit sets token_v2, a JSON Web Token, for every visitor: its sub claim is loid while you're signed out and user once you sign in (per https://github.com/public-clis/rdt-cli/issues/9; unverified)."
   },
   "features": [
     {

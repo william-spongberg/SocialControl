@@ -125,6 +125,28 @@ describe('signed-out routes', () => {
     const page = boot({ config: { routes } });
     assert.equal(page.engine.resolve('/').path, '/feed/subscriptions');
   });
+
+  test('follow the app\'s answer over the cookies the page can see', () => {
+    // The app can read HttpOnly session cookies, which the page can't.
+    const signedIn = boot({ config: { routes, session: ['reddit_session'], signedIn: true } });
+    assert.equal(signedIn.engine.resolve('/feed/subscriptions').changed, false);
+
+    const signedOut = boot({
+      beforeInject: ({ document }) => { document.cookie = 'reddit_session=abc; path=/'; },
+      config: { routes, session: ['reddit_session'], signedIn: false },
+    });
+    assert.equal(signedOut.engine.resolve('/feed/subscriptions').path, '/feed/library');
+  });
+
+  test('apply to the open page once the app finds you signed out', async () => {
+    const config = { hosts: HOSTS, routes, session: ['reddit_session'], signedIn: true };
+    const page = boot({ url: 'https://www.instagram.com/feed/subscriptions', config });
+    assert.deepEqual(page.navigations, []);
+
+    page.engine.update({ ...config, signedIn: false });
+    await settle(page.window);
+    assert.deepEqual(page.navigations, [['replace', '/feed/library']]);
+  });
 });
 
 describe('hide rules', () => {

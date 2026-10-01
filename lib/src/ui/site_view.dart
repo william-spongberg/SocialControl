@@ -100,6 +100,11 @@ class _SiteViewState extends State<SiteView> {
   /// means reading cookies to see whether the user is signed in, since some
   /// routes only apply signed out.
   Uri? _firstUrl;
+
+  /// Whether the user was signed in when the app last looked at the cookie
+  /// store, or null if it couldn't tell. The engine gets this with its
+  /// config, since page scripts can't read HttpOnly session cookies.
+  bool? _signedIn;
   final _guard = RedirectGuard();
   InAppWebViewController? _web;
   Uri? _queuedUrl;
@@ -118,11 +123,7 @@ class _SiteViewState extends State<SiteView> {
     _buildConfig();
     final pending = widget.controller._pendingUrl;
     widget.controller._pendingUrl = null;
-    if (pending == null) {
-      unawaited(_openStart());
-    } else {
-      _firstUrl = _target(pending);
-    }
+    unawaited(_openStart(pending));
     widget.site.rules.addListener(_onConfigChanged);
     widget.site.settings.addListener(_onConfigChanged);
   }
@@ -145,19 +146,23 @@ class _SiteViewState extends State<SiteView> {
     _config = EngineConfig.build(
       _rules,
       widget.site.settings.enabledFeatures(_rules),
+      signedIn: _signedIn,
     );
     _policy = UrlPolicy(_rules, _config.resolver);
   }
 
-  Future<void> _onConfigChanged() async {
+  Future<void> _onConfigChanged() => _applyConfig(updatePage: true);
+
+  /// Rebuilds the engine's config. If it changed, later page loads get the
+  /// new script, and with [updatePage] the open page updates in place.
+  Future<void> _applyConfig({required bool updatePage}) async {
     final previous = _config.json;
     _buildConfig();
     final web = _web;
     if (web == null || _config.json == previous) return;
-    // Later page loads get the new script; the open page updates in place.
     await web.removeUserScriptsByGroupName(groupName: _scriptGroup);
     await web.addUserScript(userScript: _userScript());
-    await web.evaluateJavascript(source: _config.updateScript);
+    if (updatePage) await web.evaluateJavascript(source: _config.updateScript);
   }
 
   UserScript _userScript() => UserScript(
@@ -236,13 +241,13 @@ class _SiteViewState extends State<SiteView> {
     NavigationAction action,
   ) async {
     final url = action.request.url;
-    if (url == null) return NavigationActionPolicy.ALLOW;
+    // Frames are embedded content, not navigation the user sees.
+    if (url == null || !action.isForMainFrame) {
+      return NavigationActionPolicy.ALLOW;
+    }
 
-    final decision = _policy.decide(
-      url,
-      isMainFrame: action.isForMainFrame,
-      signedIn: await _signedIn(),
-    );
+    final signedIn = await _refreshSignedIn();
+    final decision = _policy.decide(url, isMainFrame: true, signedIn: signedIn);
     switch (decision) {
       case NavAllow():
         return NavigationActionPolicy.ALLOW;
@@ -285,7 +290,11 @@ class _SiteViewState extends State<SiteView> {
   /// Where [url] should load under the site's rules. A block is reported
   /// once the frame is done, since this can run while building.
   Uri _target(Uri url) {
-    final decision = _policy.decide(url, isMainFrame: true);
+    final decision = _policy.decide(
+      url,
+      isMainFrame: true,
+      signedIn: _signedIn ?? true,
+    );
     if (decision is! NavRedirect) return url;
     final blockedLabel = decision.blockedLabel;
     if (blockedLabel != null) {
@@ -307,33 +316,52 @@ class _SiteViewState extends State<SiteView> {
   }
 
   Future<void> _restart() async {
-    final url = await _startUrl();
+    final signedIn = await _refreshSignedIn();
+    final url = _policy.startUrlFor(signedIn: signedIn);
     await _web?.loadUrl(urlRequest: URLRequest(url: WebUri.uri(url)));
   }
 
-  /// Decides the first page, then builds the WebView on it.
-  Future<void> _openStart() async {
-    final url = await _startUrl();
-    if (mounted) setState(() => _firstUrl = url);
+  /// Decides the first page, [url] or else the start page, then builds the
+  /// WebView on it. Some routes only apply signed out, so this first looks
+  /// at the cookie store.
+  Future<void> _openStart([Uri? url]) async {
+    final signedIn = await _refreshSignedIn();
+    if (!mounted) return;
+    setState(() {
+      _firstUrl = url == null
+          ? _policy.startUrlFor(signedIn: signedIn)
+          : _target(url);
+    });
   }
 
-  /// The site's start page for a user who is or isn't signed in.
-  Future<Uri> _startUrl() async =>
-      _policy.startUrlFor(signedIn: await _signedIn());
+  /// Looks at the cookie store to see whether the user is signed in, and
+  /// passes a change on to the engine: to later page loads, and with
+  /// [updatePage] to the open page, which then applies or drops its
+  /// signed-out routes straight away.
+  Future<bool> _refreshSignedIn({bool updatePage = false}) async {
+    final signedIn = await _readSignedIn();
+    if (mounted && signedIn != _signedIn) {
+      _signedIn = signedIn;
+      await _applyConfig(updatePage: updatePage);
+    }
+    // If the app can't tell, the engine goes by the page's own cookies.
+    return signedIn ?? true;
+  }
 
   /// Whether the user is signed in to the site, going by the session cookies
-  /// its rules name. Sites without any count as signed in.
-  Future<bool> _signedIn() async {
+  /// its rules name, or null if the cookies can't be read. Sites without any
+  /// count as signed in. The cookie store also holds HttpOnly cookies, which
+  /// page scripts can't see.
+  Future<bool?> _readSignedIn() async {
     if (_rules.session == null) return true;
     try {
       final cookies = await CookieManager.instance().getCookies(
         url: WebUri.uri(_rules.startUrl),
       );
-      return _rules.isSignedIn({for (final c in cookies) c.name});
+      return _rules.isSignedIn({for (final c in cookies) c.name: '${c.value}'});
     } catch (e) {
-      // Can't tell. The engine checks again once the page loads.
       debugPrint('Could not read cookies: $e');
-      return true;
+      return null;
     }
   }
 
@@ -516,6 +544,11 @@ class _SiteViewState extends State<SiteView> {
           onLoadStart: (_, _) {
             if (_error != null) setState(() => _error = null);
           },
+          // Signing in or out can happen inside a page, and an in-page
+          // navigation never reaches shouldOverrideUrlLoading.
+          onLoadStop: (_, _) => _refreshSignedIn(updatePage: true),
+          onUpdateVisitedHistory: (_, _, _) =>
+              _refreshSignedIn(updatePage: true),
           onProgressChanged: (_, progress) =>
               widget.controller._setProgress(progress),
           onReceivedError: _onReceivedError,

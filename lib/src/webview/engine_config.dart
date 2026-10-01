@@ -8,7 +8,13 @@ import '../rules/site_rules.dart';
 class EngineConfig {
   EngineConfig._(this.routes, this._json);
 
-  factory EngineConfig.build(SiteRules rules, Set<String> enabledFeatures) {
+  /// [signedIn] is whether the app found the user signed in, if it has
+  /// looked. The engine can't tell when the session cookies are HttpOnly.
+  factory EngineConfig.build(
+    SiteRules rules,
+    Set<String> enabledFeatures, {
+    bool? signedIn,
+  }) {
     final routes = <ActiveRoute>[];
     final hide = <Map<String, Object?>>[];
     final style = <Map<String, Object?>>[];
@@ -77,6 +83,7 @@ class EngineConfig {
       'hosts': rules.hosts,
       'popstateNavigation': rules.popstateNavigation,
       'session': rules.session?.cookies,
+      'signedIn': signedIn,
       'routes': [for (final r in routes) r.toJson()],
       'hide': hide,
       'style': style,

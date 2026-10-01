@@ -24,6 +24,7 @@ void main() {
       expect(json['hideByText'], isEmpty);
       expect(json['hosts'], rules.hosts);
       expect(json['session'], isNull);
+      expect(json['signedIn'], isNull);
       expect(json['popstateNavigation'], isFalse);
       expect(json['keep'], isEmpty);
     });

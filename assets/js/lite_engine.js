@@ -172,6 +172,7 @@ function liteEngine(input, env) {
       hosts: raw.hosts || [],
       popstateNavigation: raw.popstateNavigation === true,
       session: session,
+      signedIn: typeof raw.signedIn === 'boolean' ? raw.signedIn : null,
       keep: keep,
       routes: routes,
       hide: hide,
@@ -254,12 +255,15 @@ function liteEngine(input, env) {
     return { path: current, changed: changed, blocked: blocked };
   }
 
-  // Whether the user is signed in: any of the session cookies the rules name
-  // is set. Checked on every navigation, so signing out inside the site is
-  // noticed straight away. Page scripts can't see HttpOnly cookies, so the
-  // rules name ones they can. Sites without a session count as signed in.
+  // Whether the user is signed in. The app decides from the WebView's cookie
+  // store, which also holds the HttpOnly cookies page scripts can't see
+  // (Reddit's session is one), and sends the answer with the config, again
+  // whenever it changes. Without it, any of the session cookies the rules
+  // name being set in the page counts. Sites without a session count as
+  // signed in.
   function isSignedIn() {
     if (!config.session) return true;
+    if (config.signedIn !== null) return config.signedIn;
     var names = {};
     String(document.cookie).split(';').forEach(function (pair) {
       var name = pair.split('=')[0].trim();

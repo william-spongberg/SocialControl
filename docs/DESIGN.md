@@ -61,12 +61,19 @@ slim bar switches between sites.
 
 Signed out, YouTube's Subscriptions page is blank, so a route marked
 `signedOut` sends it to the You page instead, which says you aren't signed
-in and has YouTube's Sign in button. The rules name the cookies that mean
-you're signed in (`session`). The engine checks them in `document.cookie`
-on every navigation, so signing out from YouTube's own menu is noticed
-straight away; the app checks the WebView's cookie store before the first
-page load and for full page loads, so it doesn't load a page only to leave
-it.
+in and has YouTube's Sign in button.
+
+The rules name the cookies that mean you're signed in (`session`). The app
+reads them from the WebView's cookie store before the first page load, for
+each full page load, and after every page load and in-page navigation, so
+signing in or out inside a site is noticed by the next navigation. It
+passes the answer to the engine with its config, and the engine applies a
+change to the open page straight away. The engine can't tell for itself:
+page scripts can't read HttpOnly cookies, and all of Reddit's session
+cookies are HttpOnly. Reddit also sets one of them, `token_v2`, for every
+visitor. It is a JSON Web Token whose `sub` claim is `loid` until you sign
+in, which the rules record (`anonymousTokens`), so a visitor doesn't count
+as signed in.
 
 ### Rules are data; the engine is code
 
@@ -291,6 +298,11 @@ threads. The bar has a reload button instead.
   country domain, and the rules only list Australia's. Signing in from
   another country sends that step to the browser, and the sign-in can't
   finish in the app.
+- **Reddit's sign-in check is unverified signed in.** A signed-in
+  `token_v2` should have a `sub` other than `loid`, according to people
+  who use Reddit's cookies in their own tools. If Reddit sends you to its
+  login page while you're signed in, see the Reddit checklist in
+  [RULES.md](RULES.md).
 - **Single sign-on leaves the app.** A work account that signs in through
   another company's login page (Google Workspace with Okta or Microsoft,
   say) redirects to a host the rules don't list, which opens in the

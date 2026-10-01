@@ -43,7 +43,7 @@
       "SAPISID",
       "__Secure-3PAPISID"
     ],
-    "note": "Cookies YouTube sets while you're signed in and page scripts can read. Routes marked signedOut apply when none is set."
+    "note": "Cookies YouTube sets while you're signed in, seen in a signed-in session. Routes marked signedOut apply when none is set."
   },
   "features": [
     {
