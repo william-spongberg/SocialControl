@@ -3,7 +3,7 @@
   "platform": "youtube",
   "revision": 3,
   "updated": "2026-10-01",
-  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. m.youtube.com renders custom elements (ytm-*, *-view-model) whose names are stable across builds, unlike its class names. 'checked' means the selector or path was seen on logged-out mobile web; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). Sign-in is intentionally restricted to .com hosts for now, so country-specific Google domains open externally instead of creating a redirect loop.",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. m.youtube.com renders custom elements (ytm-*, *-view-model) whose names are stable across builds, unlike its class names. 'checked' means the selector or path was seen on logged-out mobile web; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). After you sign in, Google sets its cookies on your country's domain too on the way back to YouTube, and that hop must stay in the app. For now the app assumes Australia, so allowedHosts lists only accounts.google.com.au; another country's domain would open in the browser. Exact hosts rather than a pattern, so no lookalike domain can load where the app shows no address bar.",
   "startUrl": "https://m.youtube.com/",
   "hosts": [
     "youtube.com",
@@ -17,7 +17,8 @@
     "myaccount.google.com",
     "gds.google.com",
     "consent.youtube.com",
-    "consent.google.com"
+    "consent.google.com",
+    "accounts.google.com.au"
   ],
   "linkShims": [
     {

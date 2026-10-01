@@ -294,19 +294,22 @@ void main() {
       for (final url in [
         'https://accounts.google.com/v3/signin/identifier?service=youtube',
         'https://accounts.youtube.com/accounts/SetSID?continue=x',
-        'https://www.youtube.com/signin?action_handle_signin=true',
+        // Google sets cookies on the user's country domain on the way back.
+        'https://accounts.google.com.au/accounts/SetSID?continue=x',
+        'https://m.youtube.com/signin?action_handle_signin=true',
       ]) {
         expect(
-          policy.decide(Uri.parse(url), isMainFrame: true),
+          policy.decide(Uri.parse(url), isMainFrame: true, signedIn: false),
           isA<NavAllow>(),
           reason: url,
         );
       }
-      // Country-specific hosts and lookalikes stay outside the app for now.
+      // Exact hosts only, and for now only Australia's country domain.
       for (final url in [
         'https://accounts.google.com.evil.example/',
         'https://accounts.google.co.xyz/',
         'https://evil.google.com.au/',
+        'https://accounts.google.co.uk/accounts/SetSID?continue=x',
       ]) {
         expect(
           policy.decide(Uri.parse(url), isMainFrame: true),
@@ -419,6 +422,7 @@ void main() {
       for (final url in [
         // The popup "Continue with Google" opens.
         'https://accounts.google.com/v3/signin/identifier?display=popup',
+        'https://accounts.google.com.au/accounts/SetSID?continue=x',
         'https://appleid.apple.com/auth/authorize?client_id=x',
       ]) {
         expect(

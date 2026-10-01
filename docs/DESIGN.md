@@ -162,7 +162,9 @@ redirects in a row with no tap or key press in between).
   allow, such as Accounts Center and Facebook's login for Instagram, and
   Google's sign-in pages for YouTube and Reddit. A sign-in provider is only
   allowed for a site that uses it, so a link to Facebook in a Reddit post
-  opens in the browser.
+  opens in the browser. Google's sign-in passes through the user's country
+  domain; the app assumes Australia for now, so only
+  `accounts.google.com.au` is listed.
 - A link to another site in the app opens there: a YouTube link in an
   Instagram bio switches to the app's YouTube, not the YouTube app.
 - Every other site opens in the system browser. Outbound-link redirectors
@@ -274,17 +276,21 @@ threads. The bar has a reload button instead.
 ## Known limitations
 
 - **Google could start refusing YouTube sign-in.** It blocks sign-in from
-  some embedded browsers ("This browser or app may not be secure"), but on
-  it accepted a password and a 2-Step Verification prompt in the
+  some embedded browsers ("This browser or app may not be secure"), but it
+  accepted a password and a 2-Step Verification prompt in the
   app (Android WebView 154), and YouTube was signed in afterwards, even
   though the WebView names itself "Android WebView" in its client hints.
   That first sign-in's trip back hopped through Google's country domain
   (`accounts.google.com.au`), which the rules didn't list yet, so that one
-  step went to the browser; the rules now list every country's sign-in
-  host. The WebView presents itself as Chrome (no `; wv` marker), doesn't
+  step went to the browser; the rules now list it. The WebView presents
+  itself as Chrome (no `; wv` marker), doesn't
   send the `X-Requested-With` header that names the app, and keeps every
   sign-in step inside the app, since the system browser's cookies never
   reach the WebView.
+- **Australia only, for now.** Google's sign-in hops through the user's
+  country domain, and the rules only list Australia's. Signing in from
+  another country sends that step to the browser, and the sign-in can't
+  finish in the app.
 - **Single sign-on leaves the app.** A work account that signs in through
   another company's login page (Google Workspace with Okta or Microsoft,
   say) redirects to a host the rules don't list, which opens in the
