@@ -179,6 +179,12 @@ redirects in a row with no tap or key press in between).
   opens in the browser. Google's sign-in passes through the user's country
   domain; the app assumes Australia for now, so only
   `accounts.google.com.au` is listed.
+- A link that asks for a new window (`target="_blank"`, as every outbound
+  link on Reddit does) opens like any other link. A window that a page's
+  script opens is a sign-in popup, such as Reddit's "Continue with
+  Google". It opens over the site in a dialog and keeps its connection to
+  the page that opened it, which signing in needs. It closes when it
+  finishes or goes somewhere the app opens elsewhere.
 - A link to another site in the app opens there: a YouTube link in an
   Instagram bio switches to the app's YouTube, not the YouTube app.
 - Every other site opens in the system browser. Outbound-link redirectors

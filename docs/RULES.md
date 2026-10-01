@@ -285,6 +285,8 @@ Still to check on a device:
       signed in, the `session` check is wrong: in the inspector's
       Application panel, decode the middle part of the `token_v2`
       cookie's value (base64) and fix `anonymousTokens` to match.
+- [ ] A link in a post opens in the browser, with no window left over
+      Reddit.
 - [x] The top-right `Open App` button is hidden.
 - [x] The "Get the best of Reddit in the app" bottom sheet is hidden.
 - [ ] Popular and All are blocked, while a subreddit and direct post open.

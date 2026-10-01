@@ -199,47 +199,97 @@ class _SiteViewState extends State<SiteView> {
 
   // ------------------------------------------------------------ navigation
 
+  /// A page asks for a new window. For a link that opens one
+  /// (`target="_blank"`, as every outbound link on Reddit does), Android
+  /// reports the link, which then opens here like any other. A window that
+  /// a script opens has no URL yet: that is a sign-in popup, such as
+  /// Reddit's "Continue with Google", which reports back to the page that
+  /// opened it. It opens in a dialog over the site, which closes when the
+  /// popup closes itself or goes somewhere the app opens elsewhere.
   Future<bool> _onCreateWindow(
     InAppWebViewController controller,
     CreateWindowAction action,
   ) async {
     if (!mounted) return false;
+    final link = action.request.url;
+    if (link != null &&
+        !link.isScheme('about') &&
+        !link.isScheme('javascript')) {
+      unawaited(_followLink(controller, link));
+      return false;
+    }
+    var open = true;
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => Dialog.fullscreen(
-        child: SafeArea(
-          child: Stack(
-            children: [
-              InAppWebView(
-                windowId: action.windowId,
-                initialSettings: _webViewSettings(
-                  supportMultipleWindows: false,
+      builder: (dialogContext) {
+        void close() {
+          if (!open) return;
+          open = false;
+          Navigator.of(dialogContext).pop();
+        }
+
+        return Dialog.fullscreen(
+          child: SafeArea(
+            child: Stack(
+              children: [
+                InAppWebView(
+                  windowId: action.windowId,
+                  initialSettings: _webViewSettings(
+                    supportMultipleWindows: false,
+                  ),
+                  shouldOverrideUrlLoading: (popup, navigation) =>
+                      _shouldOverrideUrlLoading(
+                        popup,
+                        navigation,
+                        onLeave: close,
+                      ),
+                  onCloseWindow: (_) => close(),
                 ),
-                shouldOverrideUrlLoading: _shouldOverrideUrlLoading,
-                onCloseWindow: (_) => Navigator.of(dialogContext).pop(),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: IconButton.filledTonal(
-                  tooltip: 'Close sign-in',
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  icon: const Icon(Icons.close),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: IconButton.filledTonal(
+                    tooltip: 'Close sign-in',
+                    onPressed: close,
+                    icon: const Icon(Icons.close),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
+    // Also when the system back gesture closed it.
+    open = false;
     return true;
   }
 
+  /// Opens a link that asked for a new window in this view instead, where
+  /// the policy sends it.
+  Future<void> _followLink(InAppWebViewController controller, Uri url) async {
+    final signedIn = await _refreshSignedIn();
+    switch (_policy.decide(url, isMainFrame: true, signedIn: signedIn)) {
+      case NavAllow():
+        await controller.loadUrl(urlRequest: URLRequest(url: WebUri.uri(url)));
+      case NavCancel():
+        break;
+      case NavOpenExternal(:final url):
+        await _openExternally(url);
+      case NavRedirect(:final url, :final blockedLabel):
+        if (blockedLabel != null) _notify('$blockedLabel blocked');
+        await controller.loadUrl(urlRequest: URLRequest(url: WebUri.uri(url)));
+    }
+  }
+
+  /// [onLeave] is called when the navigation leaves this view for good: an
+  /// app link, or a page that opens in the browser or in another site.
   Future<NavigationActionPolicy> _shouldOverrideUrlLoading(
     InAppWebViewController controller,
-    NavigationAction action,
-  ) async {
+    NavigationAction action, {
+    VoidCallback? onLeave,
+  }) async {
     final url = action.request.url;
     // Frames are embedded content, not navigation the user sees.
     if (url == null || !action.isForMainFrame) {
@@ -253,10 +303,12 @@ class _SiteViewState extends State<SiteView> {
         return NavigationActionPolicy.ALLOW;
       case NavCancel():
         _dropRedirect(controller, action);
+        onLeave?.call();
         return NavigationActionPolicy.CANCEL;
       case NavOpenExternal(:final url):
         _dropRedirect(controller, action);
         unawaited(_openExternally(url));
+        onLeave?.call();
         return NavigationActionPolicy.CANCEL;
       case NavRedirect(:final url, :final blockedLabel):
         if (blockedLabel != null) _notify('$blockedLabel blocked');
