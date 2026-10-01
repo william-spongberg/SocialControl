@@ -29,6 +29,38 @@ void main() {
       expect(json['keep'], isEmpty);
     });
 
+    test('puts the sign-in route first, and passes on the app\'s answer', () {
+      final json = jsonDecode(rulesJson()) as Map<String, dynamic>
+        ..['session'] = {
+          'cookies': ['ds_user_id'],
+        }
+        ..['signIn'] = {'match': r'^/(?!accounts/)', 'to': '/accounts/login/'};
+      final rules = SiteRules.fromJson(json);
+      // With every feature off, sign-in still applies.
+      final config = EngineConfig.build(rules, const {}, signedIn: false);
+      final engine = jsonDecode(config.json) as Map<String, dynamic>;
+      expect(engine['signedIn'], isFalse);
+      expect(engine['routes'], [
+        {
+          'id': 'signIn',
+          'match': r'^/(?!accounts/)',
+          'action': 'redirect',
+          'to': '/accounts/login/',
+          'label': 'Sign in',
+          'signedOut': true,
+        },
+      ]);
+      expect(
+        config.resolver.resolve('/reels/', signedIn: false).path,
+        '/accounts/login/',
+      );
+      final features = EngineConfig.build(rules, {'hideReels'});
+      expect(
+        [for (final r in features.routes) r.id],
+        ['signIn', 'hideReels/route0'],
+      );
+    });
+
     test('passes style rules through with ids', () {
       final rules = SiteRules.parse(
         rulesJson(

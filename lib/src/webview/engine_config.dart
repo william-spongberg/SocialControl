@@ -22,6 +22,19 @@ class EngineConfig {
     final prune = <Map<String, Object?>>[];
     final keep = <Map<String, Object?>>[];
 
+    final signIn = rules.signIn;
+    if (signIn != null) {
+      routes.add(
+        ActiveRoute(
+          id: 'signIn',
+          match: signIn.match,
+          action: RouteAction.redirect,
+          to: signIn.to,
+          label: 'Sign in',
+          signedOut: true,
+        ),
+      );
+    }
     for (final feature in rules.features) {
       if (!enabledFeatures.contains(feature.id)) continue;
       for (final (i, r) in feature.routes.indexed) {

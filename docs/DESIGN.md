@@ -13,9 +13,11 @@ built to keep them scrolling.
 - **YouTube**: keep subscriptions, search, channels, playlists and the
   library. Remove the recommended Home feed, Shorts, suggested videos and
   autoplay, Explore and Trending, and ads.
-- **Reddit**: keep public subreddits, posts, search and optional sign-in.
-  Remove Popular and All feeds, promoted and recommended posts, and app
-  promotion prompts.
+- **Reddit**: keep subreddits, posts and search. Remove Popular and All
+  feeds, promoted and recommended posts, and app promotion prompts.
+
+You sign in to each site before using it, so the app shows your own
+accounts, never a site's public pages for visitors.
 
 The hardest ongoing problem is keeping filters working as the sites change,
 so filter rules are loaded from a remote file and fixes ship without an app
@@ -59,9 +61,14 @@ The bar has no back button: the system back gesture goes back through the
 site's pages, then to the picker, then out of the app. The title of the
 slim bar switches between sites.
 
-Signed out, YouTube's Subscriptions page is blank, so a route marked
-`signedOut` sends it to the You page instead, which says you aren't signed
-in and has YouTube's Sign in button.
+### Signing in
+
+Signed out, every page goes to the site's sign-in page: Instagram's and
+Reddit's login pages, and YouTube's You page, which says you aren't signed
+in and has YouTube's Sign in button. The pages that signing in needs, such
+as signing up and resetting a password, stay open. This is `signIn` in the
+rules: it is always on and comes before the features' routes, so switching
+a filter off can't get round it.
 
 The rules name the cookies that mean you're signed in (`session`). The app
 reads them from the WebView's cookie store before the first page load, for

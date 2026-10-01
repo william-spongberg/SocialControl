@@ -3,7 +3,7 @@
   "platform": "youtube",
   "revision": 3,
   "updated": "2026-10-01",
-  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. m.youtube.com renders custom elements (ytm-*, *-view-model) whose names are stable across builds, unlike its class names. 'checked' means the selector or path was seen on logged-out mobile web; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). After you sign in, Google sets its cookies on your country's domain too on the way back to YouTube, and that hop must stay in the app. For now the app assumes Australia, so allowedHosts lists only accounts.google.com.au; another country's domain would open in the browser. Exact hosts rather than a pattern, so no lookalike domain can load where the app shows no address bar.",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. m.youtube.com renders custom elements (ytm-*, *-view-model) whose names are stable across builds, unlike its class names. 'checked' means the selector or path was seen on logged-out mobile web; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). You must sign in to use YouTube in the app. After you sign in, Google sets its cookies on your country's domain too on the way back to YouTube, and that hop must stay in the app. For now the app assumes Australia, so allowedHosts lists only accounts.google.com.au; another country's domain would open in the browser. Exact hosts rather than a pattern, so no lookalike domain can load where the app shows no address bar.",
   "startUrl": "https://m.youtube.com/",
   "hosts": [
     "youtube.com",
@@ -43,34 +43,25 @@
       "SAPISID",
       "__Secure-3PAPISID"
     ],
-    "note": "Cookies YouTube sets while you're signed in, seen in a signed-in session. Routes marked signedOut apply when none is set."
+    "note": "Cookies YouTube sets while you're signed in, seen in a signed-in session. signIn applies when none is set."
+  },
+  "signIn": {
+    "match": "^/(?!(?:feed/library|signin|signin_passive)(?:[/?]|$))",
+    "to": "/feed/library",
+    "note": "Signed out, everything goes to the You page, which says you aren't signed in and has YouTube's Sign in button, its only link that matters (checked on logged-out mobile web). /signin is where Google's sign-in returns to."
   },
   "features": [
     {
       "id": "subscriptionsHome",
       "title": "Subscriptions as Home",
-      "description": "Home shows the latest videos from channels you subscribe to, instead of recommendations. Signed out, it shows the page where you sign in.",
+      "description": "Home shows the latest videos from channels you subscribe to, instead of recommendations.",
       "enabledByDefault": true,
       "routes": [
         {
           "match": "^/(?:\\?.*)?$",
           "action": "redirect",
-          "to": "/feed/library",
-          "signedOut": true,
-          "note": "Signed-out users start at YouTube's valid You page, which shows the sign-in control instead of the recommended feed."
-        },
-        {
-          "match": "^/(?:\\?.*)?$",
-          "action": "redirect",
           "to": "/feed/subscriptions",
           "note": "The recommended feed, including variants such as /?app=m."
-        },
-        {
-          "match": "^/feed/subscriptions(?:[/?]|$)",
-          "action": "redirect",
-          "to": "/feed/library",
-          "signedOut": true,
-          "note": "Signed out, Subscriptions is blank. The You tab's page says you aren't signed in and has YouTube's Sign in button. Checked on logged-out mobile web."
         }
       ],
       "hide": [

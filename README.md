@@ -11,9 +11,11 @@ the bar at the top switches between them.
   Shorts, no suggested videos or autoplay, no Explore or Trending, and ads
   removed where possible. Search, channels, playlists and your library
   still work.
-- **Reddit**: no Popular or All feeds, no promoted or recommended posts, and
-  no sign-in required. Subreddits, posts, search and optional Reddit sign-in
-  still work.
+- **Reddit**: no Popular or All feeds, and no promoted or recommended
+  posts. Subreddits, posts and search still work.
+
+Each site asks you to sign in first, so you only ever see your own accounts.
+
 The filters are data in `assets/rules/` (one file per site), applied by a
 script the app injects into the page, so a fix for a site change can ship
 without an app release.
@@ -52,8 +54,8 @@ flutter run --dart-define=RULES_BASE_URL=https://raw.githubusercontent.com/<you>
 Log in with your Instagram username and password. "Continue with Facebook"
 is unlikely to work, because Facebook blocks logins from embedded browsers.
 Sign in to YouTube with YouTube's own Sign in button; Google's sign-in page
-opens inside the app. Reddit works without an account, and its normal sign-in
-page is also available inside the app.
+opens inside the app. Sign in to Reddit on its login page or with "Continue
+with Google", which opens Google's sign-in over Reddit.
 
 ## Run it on your phone
 

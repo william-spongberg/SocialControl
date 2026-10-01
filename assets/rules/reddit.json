@@ -3,7 +3,7 @@
   "platform": "reddit",
   "revision": 4,
   "updated": "2026-10-01",
-  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. Public Reddit mobile web needs no sign-in, but normal Reddit sign-in remains available. App-promotion hooks were checked on mobile web; other selectors are unverified against future site changes. allowedHosts lists Google's and Apple's sign-in hosts: \"Continue with Google\" signs you in to Google in a popup window, and every step of that must stay in the app, including the hop to your country's Google domain. For now the app assumes Australia, so only accounts.google.com.au is listed.",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. You must sign in to use Reddit in the app. App-promotion hooks were checked on mobile web; other selectors are unverified against future site changes. allowedHosts lists Google's and Apple's sign-in hosts: \"Continue with Google\" signs you in to Google in a popup window, and every step of that must stay in the app, including the hop to your country's Google domain. For now the app assumes Australia, so only accounts.google.com.au is listed.",
   "startUrl": "https://www.reddit.com/",
   "hosts": [
     "reddit.com",
@@ -36,6 +36,11 @@
     ],
     "note": "Both are HttpOnly, so only the app can read them. reddit_session is only set for some signed-in sessions. Reddit sets token_v2, a JSON Web Token, for every visitor: its sub claim is loid while you're signed out and user once you sign in (per https://github.com/public-clis/rdt-cli/issues/9; unverified)."
   },
+  "signIn": {
+    "match": "^/(?!(?:login|register|password)(?:[/?]|$))",
+    "to": "/login/",
+    "note": "Signed out, everything but logging in, signing up and resetting a password goes to the login page. Its other links lead off Reddit, and \"Continue with SSO\" stays on /login/ (checked on mobile web)."
+  },
   "features": [
     {
       "id": "hideDiscoveryFeeds",
@@ -43,13 +48,6 @@
       "description": "Blocks Popular, All and Reddit's other discovery feeds while leaving subreddits and direct posts available.",
       "enabledByDefault": true,
       "routes": [
-        {
-          "match": "^/(?!login(?:/|$)).*$",
-          "action": "redirect",
-          "to": "/login/",
-          "signedOut": true,
-          "note": "Reddit discovery and content pages are unavailable until the user signs in."
-        },
         {
           "match": "^/(?:r/(?:popular|all)(?:/[^?]*)?|(?:popular|all)/?)(?:\\?.*)?$",
           "action": "block",

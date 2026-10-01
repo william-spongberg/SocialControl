@@ -56,6 +56,7 @@ class SiteRules {
     required this.features,
     this.updated,
     this.session,
+    this.signIn,
     this.popstateNavigation = false,
   });
 
@@ -105,6 +106,13 @@ class SiteRules {
     final session = sessionJson == null
         ? null
         : Session._fromJson(_Reader(sessionJson, 'session.'));
+    final signInJson = r.optionalObject('signIn');
+    final signIn = signInJson == null
+        ? null
+        : SignIn._fromJson(_Reader(signInJson, 'signIn.'));
+    if (signIn != null && session == null) {
+      throw RulesFormatException('signIn: needs session');
+    }
 
     final features = [
       for (final (i, f) in r.objects('features').indexed)
@@ -140,6 +148,7 @@ class SiteRules {
       ),
       features: features,
       session: session,
+      signIn: signIn,
       popstateNavigation: r.flag('popstateNavigation'),
     );
   }
@@ -168,6 +177,9 @@ class SiteRules {
   /// How to tell whether the user is signed in, for sites with routes that
   /// only apply signed out.
   final Session? session;
+
+  /// Where signed-out users are sent, so they sign in before using the site.
+  final SignIn? signIn;
 
   /// Whether the site's router renders the URL it finds on a popstate event,
   /// so the engine can navigate inside the page by pushing a URL and firing
@@ -261,6 +273,32 @@ class AnonymousToken {
       return false;
     }
   }
+}
+
+/// Sends signed-out users to the site's sign-in page: while the user is
+/// signed out, every page whose path and query match [match] goes to [to].
+/// [match] must leave out the pages that signing in needs, such as the
+/// sign-in page itself, signing up and resetting a password.
+///
+/// Always on, and ahead of the features' routes, so a filter switched off
+/// in Settings can't let a signed-out user through.
+class SignIn {
+  SignIn({required this.match, required this.to});
+
+  factory SignIn._fromJson(_Reader r) {
+    final match = r.pattern('match');
+    final to = r.string('to');
+    if (!to.startsWith('/')) {
+      throw RulesFormatException('${r.path}to: must start with /');
+    }
+    if (RegExp(match).hasMatch(to)) {
+      throw RulesFormatException('${r.path}match: must not match to');
+    }
+    return SignIn(match: match, to: to);
+  }
+
+  final String match;
+  final String to;
 }
 
 /// A user-facing filter the user can switch on or off in Settings.

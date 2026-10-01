@@ -3,7 +3,7 @@
   "platform": "instagram",
   "revision": 5,
   "updated": "2026-10-01",
-  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. \"Log in with Facebook\" needs Facebook's login hosts in allowedHosts. Target hrefs, roles and structure, never generated class names. Notes say where a signal comes from; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). Rules that hide whole feed posts use collapse, because the feed breaks when a post is removed (see docs/RULES.md).",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. You must sign in to use Instagram in the app; \"Log in with Facebook\" needs Facebook's login hosts in allowedHosts. Target hrefs, roles and structure, never generated class names. Notes say where a signal comes from; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). Rules that hide whole feed posts use collapse, because the feed breaks when a post is removed (see docs/RULES.md).",
   "startUrl": "https://www.instagram.com/",
   "hosts": [
     "instagram.com",
@@ -20,6 +20,11 @@
   ],
   "session": {
     "cookies": ["ds_user_id"]
+  },
+  "signIn": {
+    "match": "^/(?!(?:accounts|challenge)(?:[/?]|$))",
+    "to": "/accounts/login/",
+    "note": "Signed out, everything but the account pages (logging in, signing up, resetting a password, two-factor codes) and security checks goes to the login page, instead of the public pages, which promote opening the app."
   },
   "linkShims": [
     {
@@ -97,13 +102,6 @@
       "description": "Home shows posts from accounts you follow, newest first, instead of the algorithmic feed.",
       "enabledByDefault": true,
       "routes": [
-        {
-          "match": "^/(?:\\?(?!variant=).*)?$",
-          "action": "redirect",
-          "to": "/accounts/login/",
-          "signedOut": true,
-          "note": "Signed-out users start at Instagram's login page instead of the public home page, which promotes opening the app."
-        },
         {
           "match": "^/(?:\\?(?!variant=).*)?$",
           "action": "redirect",

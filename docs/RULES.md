@@ -37,7 +37,8 @@ Top level:
 | `linkShims` | Outbound-link redirectors: `host`, the query `param` holding the real URL, and optionally a `path`, for sites that redirect from their own host (`www.youtube.com`, `/redirect`, `q`). |
 | `userAgent` | `"browser"` (the default) or `"system"`. |
 | `popstateNavigation` | `true` if the site's router renders the URL it finds on a popstate event (Instagram's does). The engine then navigates inside the page when it has no link to click, instead of loading the page in full. |
-| `session` | Optional `{ "cookies", "anonymousTokens"? }`: cookies the site sets while you're signed in. The user counts as signed out when none is set. The app reads them from the WebView's cookie store, HttpOnly ones included, and tells the page engine. `anonymousTokens` lists session cookies that the site sets for every visitor, as JSON Web Tokens: `{ "cookie", "claim", "value" }` means that cookie doesn't count while its token's `claim` is `value`. Reddit's `token_v2` has `"sub": "loid"` until you sign in. Needed by routes marked `signedOut`. |
+| `session` | Optional `{ "cookies", "anonymousTokens"? }`: cookies the site sets while you're signed in. The user counts as signed out when none is set. The app reads them from the WebView's cookie store, HttpOnly ones included, and tells the page engine. `anonymousTokens` lists session cookies that the site sets for every visitor, as JSON Web Tokens: `{ "cookie", "claim", "value" }` means that cookie doesn't count while its token's `claim` is `value`. Reddit's `token_v2` has `"sub": "loid"` until you sign in. Needed by `signIn` and by routes marked `signedOut`. |
+| `signIn` | Optional `{ "match", "to" }`: while you're signed out, every page whose path and query match `match` goes to the sign-in page `to`. Leave out the pages that signing in needs, such as signing up and resetting a password; `match` can't match `to`. Always on, and ahead of the features' routes, so switching a filter off can't skip it. Needs `session`. |
 | `features` | The switches in Settings, in display order. |
 
 A feature has an `id` (letters, digits, `_` and `-`; this is where the
@@ -54,9 +55,8 @@ user's choice is stored, so never rename one), a `title`, a `description`,
   works. The first matching rule wins, and chains stop after 5 hops.
 - With `"signedOut": true`, the rule only applies while the user is signed
   out (see `session`). The app checks after every page load and in-page
-  navigation, and the engine applies a change to the open page. YouTube
-  uses it to send the empty signed-out Subscriptions page to the page with
-  its Sign in button.
+  navigation, and the engine applies a change to the open page. To send
+  every signed-out page to the sign-in page, use `signIn` instead.
 - `to` can use `$1` to `$9` for `match`'s capture groups:
   `"match": "^/shorts/([A-Za-z0-9_-]+)"` with `"to": "/watch?v=$1"` sends a
   Short to the normal video page. A group that didn't take part in the
@@ -190,10 +190,16 @@ Much of YouTube works logged out, so its rules can also be checked in a
 desktop browser: set a mobile user agent (Chrome's device toolbar does
 this), open `m.youtube.com`, and try selectors in the console.
 
-Reddit works without an account. Its app-promotion rules were checked on
-mobile web; the remaining Reddit selectors are unverified.
+Reddit's app-promotion rules were checked on mobile web; the remaining
+Reddit selectors are unverified.
 
 ### Instagram checklist (revision 1)
+
+Signed out, check:
+
+- [ ] Instagram opens on its login page, and so does any other Instagram
+      page, such as a profile someone links to. Sign up and Forgot
+      password still work.
 
 Log in with a username and password, then check:
 
@@ -238,9 +244,9 @@ Still to check on a device:
       the browser instead, find its host (`adb logcat -d | grep
       'act=android.intent.action.VIEW'` shows it) and add it to
       `allowedHosts`.
-- [x] Signed out, YouTube opens on the You page ("You're not signed in",
-      with a Sign in button), and so do Home and Subscriptions (checked
-      signed out in headless Firefox).
+- [ ] Signed out, YouTube opens on the You page ("You're not signed in",
+      with a Sign in button), and so does every other page, such as a
+      video someone links to.
 - [ ] Signed in, it opens on Subscriptions, and so does tapping the YouTube
       logo. Signing out from YouTube's own menu lands on the You page. If
       signed in still sends you to the You page, the `session` cookies are
@@ -267,9 +273,13 @@ Still to check on a device:
       YouTube, not the YouTube app.
 - [ ] Switching to Instagram pauses a playing video.
 
-### Reddit checklist (revision 2)
+### Reddit checklist (revision 4)
 
-- [x] Logged out, Reddit opens without redirecting to sign-in.
+- [ ] Signed out, Reddit opens on its login page, and so does any other
+      Reddit page. Sign up and Forgot password still work.
+- [ ] "Continue with Google" opens Google's sign-in over Reddit. Signing
+      in there closes it and signs you in to Reddit. If a step opens the
+      browser instead, add its host to `allowedHosts`, as for YouTube.
 - [ ] Signed in, Reddit stays signed in, across pages and after
       restarting the app. If it sends you to the login page while you're
       signed in, the `session` check is wrong: in the inspector's
@@ -279,7 +289,6 @@ Still to check on a device:
 - [x] The "Get the best of Reddit in the app" bottom sheet is hidden.
 - [ ] Popular and All are blocked, while a subreddit and direct post open.
 - [ ] Promoted and recommended posts are absent from feeds.
-- [ ] Reddit's normal sign-in flow remains available when requested.
 
 ## Fixing a broken rule
 

@@ -47,6 +47,23 @@ void main() {
         expect(rules.features, isNotEmpty);
       });
 
+      test('send signed-out users to the sign-in page, whatever is on', () {
+        final signIn = rules.signIn!;
+        // With every feature off, as a user could set them.
+        final resolver = EngineConfig.build(rules, const {}).resolver;
+        final policy = UrlPolicy(rules, resolver);
+        expect(
+          policy.startUrlFor(signedIn: false),
+          rules.startUrl.resolve(signIn.to),
+        );
+        expect(resolver.resolve(signIn.to, signedIn: false).changed, isFalse);
+        expect(
+          resolver.resolve('/some/page/?x=1', signedIn: false).path,
+          signIn.to,
+        );
+        expect(resolver.resolve('/some/page/?x=1').changed, isFalse);
+      });
+
       test('never resolve to a path that is itself redirected', () {
         final all = EngineConfig.build(rules, {
           for (final f in rules.features) f.id,
@@ -138,6 +155,36 @@ void main() {
       expect(rules.session?.cookies, contains('ds_user_id'));
       expect(rules.isSignedIn({'ds_user_id': '123', 'csrftoken': 'x'}), isTrue);
       expect(rules.isSignedIn({'csrftoken': 'x', 'mid': 'y'}), isFalse);
+    });
+
+    test('send signed-out users to log in, except to sign in or up', () {
+      for (final path in [
+        '/',
+        '/?variant=following',
+        '/some.person/',
+        '/p/C8xYz12AbC/',
+        '/direct/inbox/',
+        '/explore/search/',
+      ]) {
+        expect(
+          resolver.resolve(path, signedIn: false).path,
+          '/accounts/login/',
+          reason: path,
+        );
+      }
+      for (final path in [
+        '/accounts/login/',
+        '/accounts/login/two_factor?next=%2F',
+        '/accounts/emailsignup/',
+        '/accounts/password/reset/',
+        '/challenge/action/x/',
+      ]) {
+        expect(
+          resolver.resolve(path, signedIn: false).changed,
+          isFalse,
+          reason: path,
+        );
+      }
     });
 
     test('keep Facebook\'s login inside the app', () {
@@ -326,35 +373,40 @@ void main() {
       }
     });
 
-    test(
-      'send you to the sign-in page (You) instead of Subscriptions when signed out',
-      () {
-        final rules = _bundled('youtube');
-        final resolver = _defaults(rules);
-        expect(resolver.resolve('/', signedIn: false).path, '/feed/library');
+    test('send everything to the sign-in page (You) when signed out', () {
+      final rules = _bundled('youtube');
+      final resolver = _defaults(rules);
+      for (final path in [
+        '/',
+        '/feed/subscriptions',
+        '/watch?v=dQw4w9WgXcQ',
+        '/results?search_query=x',
+        '/@someone',
+        '/shorts/aB3_x-9',
+      ]) {
         expect(
-          resolver.resolve('/feed/subscriptions', signedIn: false).path,
+          resolver.resolve(path, signedIn: false).path,
           '/feed/library',
+          reason: path,
         );
-        expect(resolver.resolve('/').path, '/feed/subscriptions');
-        // Signed out, the rest of YouTube still works.
-        for (final path in [
-          '/watch?v=dQw4w9WgXcQ',
-          '/results?search_query=x',
-        ]) {
-          expect(
-            resolver.resolve(path, signedIn: false).changed,
-            isFalse,
-            reason: path,
-          );
-        }
-        final policy = UrlPolicy(rules, resolver);
+      }
+      // The sign-in page itself, and where Google's sign-in comes back to.
+      for (final path in [
+        '/feed/library',
+        '/signin?action_handle_signin=true&next=%2F',
+      ]) {
         expect(
-          policy.startUrlFor(signedIn: false).toString(),
-          'https://m.youtube.com/feed/library',
+          resolver.resolve(path, signedIn: false).changed,
+          isFalse,
+          reason: path,
         );
-      },
-    );
+      }
+      expect(resolver.resolve('/').path, '/feed/subscriptions');
+      expect(
+        UrlPolicy(rules, resolver).startUrlFor(signedIn: false).toString(),
+        'https://m.youtube.com/feed/library',
+      );
+    });
 
     test('tell signed in from signed out by YouTube\'s session cookies', () {
       final rules = _bundled('youtube');
@@ -404,16 +456,28 @@ void main() {
     final resolver = _defaults(rules);
 
     test('sends signed-out users to login before any content', () {
-      expect(rules.session, isNotNull);
-      expect(rules.isSignedIn(const {}), isFalse);
-      expect(resolver.resolve('/', signedIn: false).path, '/login/');
-      expect(
-        resolver.resolve('/r/programming/', signedIn: false).path,
+      for (final path in ['/', '/r/programming/', '/comments/abc/x/']) {
+        expect(
+          resolver.resolve(path, signedIn: false).path,
+          '/login/',
+          reason: path,
+        );
+      }
+      // Logging in, and the login page's links to sign up and reset a
+      // password.
+      for (final path in [
         '/login/',
-      );
-      expect(resolver.resolve('/login/', signedIn: false).changed, isFalse);
+        '/login/?dest=x',
+        '/register/',
+        '/password/',
+      ]) {
+        expect(
+          resolver.resolve(path, signedIn: false).changed,
+          isFalse,
+          reason: path,
+        );
+      }
       expect(resolver.resolve('/', signedIn: true).changed, isFalse);
-      expect(resolver.resolve('/login/').changed, isFalse);
 
       final policy = UrlPolicy(rules, resolver);
       expect(
@@ -424,6 +488,7 @@ void main() {
         policy.decide(
           Uri.parse('https://accounts.reddit.com/login/'),
           isMainFrame: true,
+          signedIn: false,
         ),
         isA<NavAllow>(),
       );
@@ -785,6 +850,34 @@ void main() {
       expect(
         () => SiteRules.fromJson(json),
         _formatError('session.anonymousTokens: "other" is not one of cookies'),
+      );
+    });
+
+    test('reads the sign-in page, which needs a session', () {
+      final json = _json()
+        ..['session'] = {
+          'cookies': ['ds_user_id'],
+        }
+        ..['signIn'] = {'match': r'^/(?!accounts/)', 'to': '/accounts/login/'};
+      final signIn = SiteRules.fromJson(json).signIn!;
+      expect(signIn.match, r'^/(?!accounts/)');
+      expect(signIn.to, '/accounts/login/');
+
+      (json['signIn'] as Map)['to'] = '/login/';
+      expect(
+        () => SiteRules.fromJson(json),
+        _formatError('signIn.match: must not match to'),
+      );
+      (json['signIn'] as Map)['to'] = 'https://example.com/';
+      expect(
+        () => SiteRules.fromJson(json),
+        _formatError('signIn.to: must start with /'),
+      );
+      (json['signIn'] as Map)['to'] = '/accounts/login/';
+      json.remove('session');
+      expect(
+        () => SiteRules.fromJson(json),
+        _formatError('signIn: needs session'),
       );
     });
 
