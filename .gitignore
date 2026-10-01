@@ -49,3 +49,6 @@ test/js/node_modules/
 
 # Local planning notes
 /TODO.md
+
+# Flutter widget previews
+.widget_preview/
