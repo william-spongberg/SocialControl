@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "platform": "youtube",
-  "revision": 3,
+  "revision": 4,
   "updated": "2026-10-01",
   "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. m.youtube.com renders custom elements (ytm-*, *-view-model) whose names are stable across builds, unlike its class names. 'checked' means the selector or path was seen on logged-out mobile web; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). You must sign in to use YouTube in the app. After you sign in, Google sets its cookies on your country's domain too on the way back to YouTube, and that hop must stay in the app. For now the app assumes Australia, so allowedHosts lists only accounts.google.com.au; another country's domain would open in the browser. Exact hosts rather than a pattern, so no lookalike domain can load where the app shows no address bar.",
   "startUrl": "https://m.youtube.com/",
@@ -66,8 +66,8 @@
       ],
       "hide": [
         {
-          "selector": "ytm-pivot-bar-item-renderer:has(> .pivot-w2w)",
-          "note": "The Home tab in the bottom bar (w2w is \"what to watch\"). Checked."
+          "selector": "ytm-pivot-bar-item-renderer:has(> .pivot-w2w, > .w2w)",
+          "note": "The Home tab in the bottom bar (w2w is \"what to watch\"). Checked. .w2w is its class in the fallback bar YouTube sometimes draws instead (Home, Shorts, Library), seen signed in."
         }
       ]
     },
@@ -98,8 +98,8 @@
       ],
       "hide": [
         {
-          "selector": "ytm-pivot-bar-item-renderer:has(> .pivot-shorts)",
-          "note": "The Shorts tab in the bottom bar. Checked."
+          "selector": "ytm-pivot-bar-item-renderer:has(> .pivot-shorts, > .shorts)",
+          "note": "The Shorts tab in the bottom bar, also in the fallback bar (.shorts). Checked."
         },
         {
           "selector": "ytm-reel-shelf-renderer",
