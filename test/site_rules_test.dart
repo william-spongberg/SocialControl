@@ -590,10 +590,29 @@ void main() {
       final prompts = rules.features.firstWhere(
         (feature) => feature.id == 'hideAppPrompts',
       );
-      final selector = prompts.hide.single.selector;
-      expect(selector, contains('#xpromo-small-header'));
-      expect(selector, contains('#open-app-header-cta'));
-      expect(selector, contains('div.configured-xpromo-bottom-sheet'));
+      final selectors = [for (final h in prompts.hide) h.selector].join(', ');
+      expect(selectors, contains('#xpromo-small-header'));
+      expect(selectors, contains('#open-app-header-cta'));
+      expect(selectors, contains('div.configured-xpromo-bottom-sheet'));
+      expect(selectors, contains('#xpromo-bottom-sheet'));
+      // The "View in Reddit App" sheet stops the page scrolling and taking
+      // taps while it is open, so hiding it must undo that.
+      final unlock = prompts.style.single;
+      expect(unlock.selector, contains('#xpromo-bottom-sheet[open]'));
+      expect(unlock.css, contains('pointer-events: auto'));
+      expect(unlock.css, contains('overflow: visible'));
+    });
+
+    test('hides ads between comments and recommended posts', () {
+      String selectorsOf(String id) => [
+        for (final h in rules.features.firstWhere((f) => f.id == id).hide)
+          h.selector,
+      ].join(', ');
+      expect(selectorsOf('hideAds'), contains('shreddit-comments-page-ad'));
+      expect(
+        selectorsOf('hideRecommendations'),
+        contains('shreddit-post[recommendation-source]'),
+      );
     });
   });
 

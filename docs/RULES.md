@@ -291,9 +291,11 @@ Still to check on a device:
       Reddit.
 - [x] The top-right `Open App` button is hidden.
 - [x] The "Get the best of Reddit in the app" bottom sheet is hidden.
+- [ ] The "View in Reddit App" sheet never shows, and the page scrolls.
 - [ ] Popular, All, News and Explore are blocked, and the side menu
       doesn't list them, while a subreddit and direct post open.
-- [ ] Promoted and recommended posts are absent from feeds.
+- [ ] Promoted and recommended posts are absent from feeds, and ads from
+      between comments.
 
 ## Fixing a broken rule
 

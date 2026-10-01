@@ -97,12 +97,16 @@
     {
       "id": "hideAds",
       "title": "Hide ads",
-      "description": "Hides promoted posts and ad containers from feeds.",
+      "description": "Hides promoted posts in feeds and ads between comments.",
       "enabledByDefault": true,
       "hide": [
         {
           "selector": "shreddit-ad-post, article:has([data-testid=\"ad-link\"]), [data-testid=\"post-container\"]:has([data-testid=\"ad-link\"])",
           "collapse": true
+        },
+        {
+          "selector": "shreddit-comments-page-ad, shreddit-comment-tree-ad, shreddit-comment-tree-ads",
+          "note": "Ads on a post's page, under the post and between comments. Checked signed in."
         }
       ],
       "hideByText": [
@@ -117,12 +121,18 @@
     {
       "id": "hideRecommendations",
       "title": "Hide recommendations",
-      "description": "Removes recommended posts and community suggestions from feeds.",
+      "description": "Hides posts Reddit recommends from communities you haven't joined.",
       "enabledByDefault": true,
       "hide": [
         {
+          "selector": "shreddit-post[recommendation-source]",
+          "collapse": true,
+          "note": "Posts Reddit's For You feed picks for you from communities you haven't joined, which it marks with the reason (popular, trending_search_posts, geo_explore_subreddits, ...). 24 of the first 28 posts in a signed-in home feed; posts from joined communities have no such attribute. Checked signed in."
+        },
+        {
           "selector": "shreddit-recommended-post, shreddit-feed-card[recommendation], article:has([data-testid=\"recommendation-label\"])",
-          "collapse": true
+          "collapse": true,
+          "note": "Older forms. unverified"
         }
       ],
       "hideByText": [
@@ -143,6 +153,17 @@
         {
           "selector": "#xpromo-small-header, #open-app-header-cta, div.configured-xpromo-bottom-sheet",
           "note": "The top-right Open App control and the bottom-sheet popup, checked on mobile web."
+        },
+        {
+          "selector": "#xpromo-bottom-sheet",
+          "note": "The \"View in Reddit App\" sheet at the bottom of the screen, a faceplate-bottom-sheet. Checked signed in."
+        }
+      ],
+      "style": [
+        {
+          "selector": "body:has(#xpromo-bottom-sheet[open])",
+          "css": "overflow: visible; pointer-events: auto",
+          "note": "While that sheet is open, Reddit stops the page scrolling and taking taps (overflow: hidden and pointer-events: none on body) until you close it, which you can't once it's hidden. Checked signed in."
         }
       ]
     }
