@@ -291,7 +291,8 @@ Still to check on a device:
       Reddit.
 - [x] The top-right `Open App` button is hidden.
 - [x] The "Get the best of Reddit in the app" bottom sheet is hidden.
-- [ ] Popular and All are blocked, while a subreddit and direct post open.
+- [ ] Popular, All, News and Explore are blocked, and the side menu
+      doesn't list them, while a subreddit and direct post open.
 - [ ] Promoted and recommended posts are absent from feeds.
 
 ## Fixing a broken rule

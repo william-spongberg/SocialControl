@@ -67,7 +67,7 @@
     {
       "id": "hideDiscoveryFeeds",
       "title": "Hide discovery feeds",
-      "description": "Blocks Popular, All and Reddit's other discovery feeds while leaving subreddits and direct posts available.",
+      "description": "Blocks Popular, All, News, Explore and Reddit's other discovery feeds while leaving subreddits and direct posts available.",
       "enabledByDefault": true,
       "routes": [
         {
@@ -75,11 +75,22 @@
           "action": "block",
           "to": "/",
           "label": "Discovery feeds"
+        },
+        {
+          "match": "^/(?:news|explore)(?:[/?]|$)",
+          "action": "block",
+          "to": "/",
+          "label": "Discovery feeds",
+          "note": "News and Explore, linked from the side menu (checked signed in)."
         }
       ],
       "hide": [
         {
           "selector": "a[href^=\"/r/popular\"], a[href^=\"/r/all\"], a[href=\"/popular\"], a[href=\"/all\"]"
+        },
+        {
+          "selector": "left-nav-top-section",
+          "note": "The top of the side menu: Home, Popular, News, Explore and Chat. Its links are in shadow DOM, which page CSS can't reach, so the whole section goes; the Reddit logo still goes Home, and Chat would open in the browser (checked signed in)."
         }
       ]
     },

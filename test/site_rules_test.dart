@@ -561,11 +561,26 @@ void main() {
     });
 
     test('blocks discovery feeds but leaves subreddits and posts alone', () {
-      for (final path in ['/r/popular/', '/r/all/', '/popular/']) {
+      for (final path in [
+        '/r/popular/',
+        '/r/all/',
+        '/popular/',
+        '/news/',
+        '/explore/',
+      ]) {
         final resolution = resolver.resolve(path);
         expect(resolution.blockedLabel, 'Discovery feeds', reason: path);
         expect(resolution.path, '/?feed=following', reason: path);
       }
+      // The side menu's links to them are in shadow DOM, so the whole
+      // section is hidden.
+      expect([
+        for (final h
+            in rules.features
+                .firstWhere((f) => f.id == 'hideDiscoveryFeeds')
+                .hide)
+          h.selector,
+      ], contains('left-nav-top-section'));
       for (final path in ['/r/programming/', '/comments/abc/post-title/']) {
         expect(resolver.resolve(path).changed, isFalse, reason: path);
       }

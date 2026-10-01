@@ -14,8 +14,8 @@ built to keep them scrolling.
   library. Remove the recommended Home feed, Shorts, suggested videos and
   autoplay, Explore and Trending, and ads.
 - **Reddit**: keep subreddits, posts and search. Remove the For You feed,
-  Popular and All feeds, promoted and recommended posts, and app promotion
-  prompts.
+  Popular, All, News and Explore, promoted and recommended posts, and app
+  promotion prompts.
 
 You sign in to each site before using it, so the app shows your own
 accounts, never a site's public pages for visitors.

@@ -12,7 +12,8 @@ the bar at the top switches between them.
   removed where possible. Search, channels, playlists and your library
   still work.
 - **Reddit**: Home shows the communities you've joined, with no For You
-  feed, no Popular or All feeds, and no promoted or recommended posts.
+  feed, no Popular, All, News or Explore, and no promoted or recommended
+  posts.
   Subreddits, posts and search still work.
 
 Each site asks you to sign in first, so you only ever see your own accounts.
