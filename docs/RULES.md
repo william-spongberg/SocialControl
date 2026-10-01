@@ -273,7 +273,7 @@ Still to check on a device:
       YouTube, not the YouTube app.
 - [ ] Switching to Instagram pauses a playing video.
 
-### Reddit checklist (revision 4)
+### Reddit checklist (revision 5)
 
 - [ ] Signed out, Reddit opens on its login page, and so does any other
       Reddit page. Sign up and Forgot password still work.
@@ -285,6 +285,8 @@ Still to check on a device:
       signed in, the `session` check is wrong: in the inspector's
       Application panel, decode the middle part of the `token_v2`
       cookie's value (base64) and fix `anonymousTokens` to match.
+- [ ] Home shows posts from communities you've joined, with no For You
+      tab.
 - [ ] A link in a post opens in the browser, with no window left over
       Reddit.
 - [x] The top-right `Open App` button is hidden.

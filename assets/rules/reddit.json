@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "platform": "reddit",
-  "revision": 4,
+  "revision": 5,
   "updated": "2026-10-01",
   "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. You must sign in to use Reddit in the app. App-promotion hooks were checked on mobile web; other selectors are unverified against future site changes. allowedHosts lists Google's and Apple's sign-in hosts: \"Continue with Google\" signs you in to Google in a popup window, and every step of that must stay in the app, including the hop to your country's Google domain. For now the app assumes Australia, so only accounts.google.com.au is listed.",
   "startUrl": "https://www.reddit.com/",
@@ -42,6 +42,28 @@
     "note": "Signed out, everything but logging in, signing up and resetting a password goes to the login page. Its other links lead off Reddit, and \"Continue with SSO\" stays on /login/ (checked on mobile web)."
   },
   "features": [
+    {
+      "id": "followingFeed",
+      "title": "Following feed",
+      "description": "Home shows posts from communities you've joined, instead of Reddit's For You feed of recommendations.",
+      "enabledByDefault": true,
+      "routes": [
+        {
+          "match": "^/(?:\\?(?!feed=following(?:&|$)).*)?$",
+          "action": "redirect",
+          "to": "/?feed=following",
+          "note": "Home opens on its Following tab with ?feed=following (checked signed in)."
+        }
+      ],
+      "hideByText": [
+        {
+          "container": "button[role=\"tab\"]",
+          "marker": "button[role=\"tab\"]",
+          "text": ["For You"],
+          "note": "The For You tab next to Following on Home. Switching tabs doesn't change the address, so the route can't catch it (checked signed in)."
+        }
+      ]
+    },
     {
       "id": "hideDiscoveryFeeds",
       "title": "Hide discovery feeds",

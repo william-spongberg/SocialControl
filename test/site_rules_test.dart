@@ -477,11 +477,14 @@ void main() {
           reason: path,
         );
       }
-      expect(resolver.resolve('/', signedIn: true).changed, isFalse);
+      expect(resolver.resolve('/', signedIn: true).path, '/?feed=following');
 
       final policy = UrlPolicy(rules, resolver);
       expect(
-        policy.decide(Uri.parse('https://www.reddit.com/'), isMainFrame: true),
+        policy.decide(
+          Uri.parse('https://www.reddit.com/?feed=following'),
+          isMainFrame: true,
+        ),
         isA<NavAllow>(),
       );
       expect(
@@ -542,11 +545,26 @@ void main() {
       );
     });
 
+    test('opens Home on the Following feed, not For You', () {
+      for (final path in ['/', '/?feed=for-you', '/?feed=home&x=1']) {
+        final resolution = resolver.resolve(path);
+        expect(resolution.path, '/?feed=following', reason: path);
+        expect(resolution.blockedLabel, isNull, reason: path);
+      }
+      expect(resolver.resolve('/?feed=following').changed, isFalse);
+      expect(resolver.resolve('/?feed=following&sort=new').changed, isFalse);
+      final forYouTab = rules.features
+          .firstWhere((f) => f.id == 'followingFeed')
+          .hideByText
+          .single;
+      expect(forYouTab.text, ['For You']);
+    });
+
     test('blocks discovery feeds but leaves subreddits and posts alone', () {
       for (final path in ['/r/popular/', '/r/all/', '/popular/']) {
         final resolution = resolver.resolve(path);
         expect(resolution.blockedLabel, 'Discovery feeds', reason: path);
-        expect(resolution.path, '/', reason: path);
+        expect(resolution.path, '/?feed=following', reason: path);
       }
       for (final path in ['/r/programming/', '/comments/abc/post-title/']) {
         expect(resolver.resolve(path).changed, isFalse, reason: path);

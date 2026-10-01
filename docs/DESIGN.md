@@ -13,8 +13,9 @@ built to keep them scrolling.
 - **YouTube**: keep subscriptions, search, channels, playlists and the
   library. Remove the recommended Home feed, Shorts, suggested videos and
   autoplay, Explore and Trending, and ads.
-- **Reddit**: keep subreddits, posts and search. Remove Popular and All
-  feeds, promoted and recommended posts, and app promotion prompts.
+- **Reddit**: keep subreddits, posts and search. Remove the For You feed,
+  Popular and All feeds, promoted and recommended posts, and app promotion
+  prompts.
 
 You sign in to each site before using it, so the app shows your own
 accounts, never a site's public pages for visitors.
@@ -274,9 +275,13 @@ their own tab bar at the bottom, and a second one would take space from the
 page.
 
 **The Following feed as Home; Subscriptions as Home.** `/?variant=following`
-is Instagram's own chronological feed of accounts you follow, and
-`/feed/subscriptions` is YouTube's. Redirecting to them is a stable URL
-hook, which is more robust than hiding suggestions item by item.
+is Instagram's own chronological feed of accounts you follow,
+`/feed/subscriptions` is YouTube's, and `/?feed=following` opens Reddit's
+Home on its Following tab. Redirecting to them is a stable URL hook, which
+is more robust than hiding suggestions item by item. Hiding Reddit's
+recommended posts inside its For You feed was tried first: with most posts
+hidden, the page stays short, Reddit's load-more trigger stays in view and
+never fires again, and the feed stops after two pages.
 
 **YouTube's mobile site.** `m.youtube.com` is built from custom elements
 (`ytm-video-with-context-renderer`, `ytm-shorts-lockup-view-model`) whose
