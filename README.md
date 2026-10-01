@@ -29,9 +29,9 @@ without an app release.
 - [docs/DESIGN.md](docs/DESIGN.md): how it works, decisions, known limitations, roadmap
 - [docs/RULES.md](docs/RULES.md): the rules format, checking rules on a device, shipping fixes
 
-Status: MVP. Most filter rules have not yet been checked against a logged-in
-session; start with the checklists in docs/RULES.md. Signing in to YouTube
-inside the app works.
+Status: MVP. Every site's rules have been checked signed in, in a browser on
+a computer, but not all of them on a phone; the checklists in docs/RULES.md
+say what's left. Signing in to YouTube inside the app works.
 
 ## Screenshots
 

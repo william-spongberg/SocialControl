@@ -206,10 +206,35 @@ Much of YouTube works logged out, so its rules can also be checked in a
 desktop browser: set a mobile user agent (Chrome's device toolbar does
 this), open `m.youtube.com`, and try selectors in the console.
 
-Reddit's app-promotion rules were checked on mobile web; the remaining
-Reddit selectors are unverified.
+### Checking rules on a computer
 
-### Instagram checklist (revision 1)
+The sites' mobile pages also run in desktop Firefox, signed in, with the
+engine injected as the app injects it. Give a Firefox profile a phone's
+user agent (`general.useragent.override`) and sign in to the sites in a
+normal window: Google refuses to sign in a browser that automation
+drives. Then start Firefox with that profile from puppeteer-core, over
+WebDriver BiDi, and add the app's document-start script to each page
+before it loads (`EngineConfig.build(rules, features, signedIn:
+...).userScript(engine)`, from a Dart script). Read the session cookies
+from the browser to choose `signedIn`, as the app reads its cookie store.
+
+This checks rules and everything the engine does. The app's own part,
+which links load where (`UrlPolicy`), can be checked by running it in
+plain Dart over the URLs the browser visited; Firefox's history has every
+step of a sign-in. TikTok asks a driven browser to drag a slider to solve
+a puzzle now and then, and quietly drops follows it makes.
+
+The Flutter web build can't do this: it shows each site in a frame, which
+all four sites refuse (`X-Frame-Options`), and it can't inject the engine
+into another site's frame.
+
+### Instagram checklist (revision 5)
+
+Checked signed in on a computer (see above): Home opens the Following
+feed and keeps loading posts as you scroll, with posts on screen
+throughout; the Reels tab and links are hidden and `/reels/` goes Home;
+Explore opens search at `/explore/search/` with no grid; the inbox lists
+your conversations. Still to check on a device:
 
 Signed out, check:
 
@@ -247,11 +272,15 @@ Log in with a username and password, then check:
 If `/explore/search/` isn't a real page on mobile web, change the
 `hideExplore` redirect to go to a search page that exists.
 
-### YouTube checklist (revision 1)
+### YouTube checklist (revision 4)
 
 Checked logged out in headless Firefox: the Home and Shorts tabs, Shorts in
 search and on channels, related videos, comments, the
 Open App button, and the Home, Shorts, channel Shorts and Trending routes.
+Checked signed in on a computer: Subscriptions loads with no Shorts; the
+bottom bar has only Subscriptions and You, also when YouTube draws its
+fallback bar (Home, Shorts, Library); search works; a Short opens as a
+normal video; a watch page loses its autoplay, end screen and ad data.
 Still to check on a device:
 
 - [x] Signing in works: Google accepted the password and 2-Step
@@ -291,6 +320,15 @@ Still to check on a device:
 
 ### Reddit checklist (revision 5)
 
+Checked signed in on a computer: signing in with "Continue with Google"
+passed only through allowed hosts; a signed-in `token_v2` has `sub` set to
+`user`, so the session check holds; Home opens on Following
+(`/?feed=following`) with no For You tab; Popular, All, News and Explore
+are blocked, and the side menu doesn't list them; a subreddit and a post
+open; promoted posts are hidden in feeds and between
+comments; the "View in Reddit App" sheet is hidden, and the page still
+scrolls and takes taps. Still to check on a device:
+
 - [ ] Signed out, Reddit opens on its login page, and so does any other
       Reddit page. Sign up and Forgot password still work.
 - [ ] "Continue with Google" opens Google's sign-in over Reddit. Signing
@@ -315,11 +353,23 @@ Still to check on a device:
 
 ### TikTok checklist (revision 1)
 
+Checked signed in on a computer: signing in with "Continue with Google"
+passed only through allowed hosts; `sessionid` and `sid_tt` appear once
+you sign in; Home opens Following, with no For You tab at the top or in
+the side menu and no Discover tab; a shared video plays on its own and
+swiping goes nowhere; search pages show matching accounts, and the
+search box's app link becomes an account search (in plain Dart); hashtags,
+sounds and LIVE are blocked; comments open; profiles show their videos;
+the inbox shows notifications; no open-the-app buttons or pop-ups. Still
+to check on a device:
+
 - [ ] Signed out, TikTok opens on its login page, and so does any other
       TikTok page. "Use phone / email / username" and Sign up work.
 - [ ] "Continue with Google" opens Google's sign-in over TikTok, and
       signing in there closes it and signs you in to TikTok.
 - [ ] Following shows videos from accounts you follow, and they play.
+      (Not checked anywhere yet: TikTok dropped follows made from the
+      test browser.)
 - [ ] A TikTok share link (`vm.tiktok.com/...`) in another site opens in
       the app's TikTok, plays on its own, and swiping up shows nothing
       more.

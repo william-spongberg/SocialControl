@@ -336,11 +336,6 @@ threads. The bar has a reload button instead.
   country domain, and the rules only list Australia's. Signing in from
   another country sends that step to the browser, and the sign-in can't
   finish in the app.
-- **Reddit's sign-in check is unverified signed in.** A signed-in
-  `token_v2` should have a `sub` other than `loid`, according to people
-  who use Reddit's cookies in their own tools. If Reddit sends you to its
-  login page while you're signed in, see the Reddit checklist in
-  [RULES.md](RULES.md).
 - **TikTok's mobile site is a cut-down TikTok.** It has no messages (the
   Inbox shows notifications), no posting (its middle button only opens
   the app, so the app hides it) and no video search: search finds
@@ -356,13 +351,12 @@ threads. The bar has a reload button instead.
   stitched into the video stream itself can't be removed this way.
 - **YouTube Home reloads the page.** YouTube's logo and Home tab aren't
   links, so going Home is a full page load of Subscriptions.
-- **Unverified rules.** Both rules files were written without a logged-in
-  session. Rules marked `unverified` need checking on a device (see the
-  checklists in RULES.md). On Instagram the riskiest assumptions are the
-  `/explore/search/` route and the text labels; the `?variant=following`
-  feed works on mobile web (checked on Android). On YouTube,
-  the logged-in pages are unchecked: Shorts in the Subscriptions feed, the
-  Subscriptions tab, and feed ads.
+- **Unverified rules.** Every site's rules have been checked signed in on a
+  computer (see "Checking rules on a computer" in RULES.md), but not all
+  of them on a phone, and rules marked `unverified` haven't been seen
+  working anywhere yet (see the checklists in RULES.md). TikTok's
+  Following feed hasn't been seen with videos: TikTok dropped the follows
+  made from the test browser.
 - **The inbox's tab bar is a copy.** It is taken from the page before, so
   it shows what that page showed (such as the profile picture), and it may
   cover the bottom of the inbox list. Checked on a device only in parts:
@@ -403,6 +397,9 @@ threads. The bar has a reload button instead.
   tabs, Shorts in search and on channels, related videos and comments,
   removed autoplay, end-screen and ad data, and kept videos playing and
   search results loading as you scroll.
+- All four sites were checked signed in, in Firefox on a computer with the
+  engine injected (see "Checking rules on a computer" in RULES.md); the
+  checklists there say what that covered.
 
 ## Roadmap
 
