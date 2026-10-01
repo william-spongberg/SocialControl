@@ -1,8 +1,8 @@
 # SocialControl
 
-Calmer social media. SocialControl shows Instagram's, YouTube's and Reddit's
-mobile websites in filtered WebViews. When it starts, you pick which one to open;
-the bar at the top switches between them.
+Calmer social media. SocialControl shows Instagram's, YouTube's, Reddit's and
+TikTok's mobile websites in filtered WebViews. When it starts, you pick which
+one to open; the bar at the top switches between them.
 
 - **Instagram**: no Reels, no Explore grid, a chronological Following feed,
   and no ads or suggested posts. Messages, stories, profiles and posting
@@ -15,6 +15,10 @@ the bar at the top switches between them.
   feed, no Popular, All, News or Explore, and no promoted or recommended
   posts.
   Subreddits, posts and search still work.
+- **TikTok**: Home shows accounts you follow, with no For You feed, no
+  Discover, LIVE, hashtag or sound feeds, and no ads. A video someone
+  sends you plays on its own. Search finds accounts. Profiles, comments
+  and the inbox still work.
 
 Each site asks you to sign in first, so you only ever see your own accounts.
 
@@ -57,7 +61,10 @@ Log in with your Instagram username and password. "Continue with Facebook"
 is unlikely to work, because Facebook blocks logins from embedded browsers.
 Sign in to YouTube with YouTube's own Sign in button; Google's sign-in page
 opens inside the app. Sign in to Reddit on its login page or with "Continue
-with Google", which opens Google's sign-in over Reddit.
+with Google", which opens Google's sign-in over Reddit. Sign in to TikTok
+with "Use phone / email / username" or "Continue with Google", which opens
+Google's sign-in over TikTok. TikTok sometimes asks you to drag a slider to
+fit a puzzle first.
 
 ## Run it on your phone
 

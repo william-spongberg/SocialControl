@@ -616,6 +616,225 @@ void main() {
     });
   });
 
+  group('bundled TikTok rules', () {
+    final rules = _bundled('tiktok');
+    final resolver = _defaults(rules);
+    final policy = UrlPolicy(rules, resolver);
+
+    String? decided(String url, {bool signedIn = true}) => switch (policy
+        .decide(Uri.parse(url), isMainFrame: true, signedIn: signedIn)) {
+      NavAllow() => 'allow',
+      NavCancel() => 'cancel',
+      NavOpenExternal() => 'browser',
+      NavRedirect(:final url) => url.toString(),
+    };
+
+    test('block For You, and open Home on the Following feed', () {
+      // Where share links land.
+      for (final path in ['/', '/?_r=1']) {
+        final resolution = resolver.resolve(path);
+        expect(resolution.path, '/following', reason: path);
+        expect(resolution.blockedLabel, isNull, reason: path);
+      }
+      // Where /explore lands.
+      for (final path in ['/foryou', '/foryou?lang=en']) {
+        final resolution = resolver.resolve(path);
+        expect(resolution.path, '/following', reason: path);
+        expect(resolution.blockedLabel, 'For You', reason: path);
+      }
+      expect(resolver.resolve('/following').changed, isFalse);
+      expect(policy.startUrl.toString(), 'https://www.tiktok.com/following');
+    });
+
+    test('empty the For You feed after a video someone sends you', () {
+      final forYou = rules.features.firstWhere((f) => f.id == 'blockForYou');
+      for (final rule in forYou.prune) {
+        final paths = RegExp(rule.paths!);
+        expect(paths.hasMatch('/@afl/video/7689717987225455893'), isTrue);
+        // Share links land on a video with no name.
+        expect(paths.hasMatch('/@/video/7621174537110949140?_r=1'), isTrue);
+        expect(paths.hasMatch('/@afl/photo/7674748465661988117'), isTrue);
+        expect(paths.hasMatch('/following'), isFalse);
+        expect(paths.hasMatch('/@afl'), isFalse);
+      }
+      expect([
+        for (final p in forYou.prune) p.path,
+      ], containsAll(['itemList.[-].id', 'hasMore']));
+    });
+
+    test('block Discover and its feeds, and hide its tab', () {
+      for (final (path, label) in [
+        ('/discover', 'Discover'),
+        ('/discover/travel', 'Discover'),
+        ('/explore', 'Discover'),
+        ('/tag/fyp', 'Hashtag feeds'),
+        ('/music/original-sound-7673295678881172246', 'Sound feeds'),
+      ]) {
+        final resolution = resolver.resolve(path);
+        expect(resolution.blockedLabel, label, reason: path);
+        expect(resolution.path, '/search', reason: path);
+      }
+      final discover = rules.features.firstWhere((f) => f.id == 'hideDiscover');
+      expect([
+        for (final h in discover.hide) h.selector,
+      ], contains('div:has(> a[data-e2e="discover-icon"])'));
+      final forYou = rules.features.firstWhere((f) => f.id == 'blockForYou');
+      expect([
+        for (final h in forYou.hide) h.selector,
+      ], contains('a[data-e2e="header-foryou"]'));
+    });
+
+    test('search accounts, the only search on TikTok\'s mobile site', () {
+      expect(resolver.resolve('/search').changed, isFalse);
+      expect(resolver.resolve('/search?q=').changed, isFalse);
+      for (final path in [
+        '/search?q=cats',
+        '/search/video?q=cats',
+        '/search/live?q=cats',
+      ]) {
+        expect(
+          resolver.resolve(path).path,
+          '/search/user?q=cats',
+          reason: path,
+        );
+      }
+      expect(resolver.resolve('/search/user?q=cats').changed, isFalse);
+      // The search box hands the search to the TikTok app, which the app
+      // turns into an account search.
+      for (final (url, expected) in [
+        (
+          'https://app-va.tiktokv.com/redirect/?redirect_url=snssdk1233%3A%2F%2Fsearch%3Fkeyword%3Dhawthorn%26refer%3Dweb',
+          'https://www.tiktok.com/search/user?q=hawthorn',
+        ),
+        (
+          'https://app-va.tiktokv.com/redirect/?redirect_url=snssdk1233%3A%2F%2Fsearch%3Fkeyword%3Dhawthorn%2520fc',
+          'https://www.tiktok.com/search/user?q=hawthorn%20fc',
+        ),
+        (
+          'https://snssdk1233.onelink.me/bIdt?af_dp=snssdk1233%3A%2F%2Fsearch%3Fkeyword%3Dcats',
+          'https://www.tiktok.com/search/user?q=cats',
+        ),
+      ]) {
+        expect(decided(url), expected, reason: url);
+      }
+    });
+
+    test('never open the TikTok app', () {
+      for (final url in [
+        'https://app-va.tiktokv.com/redirect/?redirect_url=snssdk1233%3A%2F%2Fuser%2Fprofile%2F1',
+        'https://snssdk1233.onelink.me/bIdt?af_dp=snssdk1233%3A%2F%2Faweme%2Fdetail%2F1',
+        'snssdk1233://aweme/detail/7464712852234980630',
+      ]) {
+        expect(decided(url), 'cancel', reason: url);
+      }
+    });
+
+    test('block LIVE, but not accounts with live in their name', () {
+      for (final path in ['/live', '/live/following', '/@someone/live']) {
+        final resolution = resolver.resolve(path);
+        expect(resolution.blockedLabel, 'LIVE', reason: path);
+        expect(resolution.path, '/following', reason: path);
+      }
+      for (final path in [
+        '/@livewire',
+        '/@someone/video/7689717987225455893',
+      ]) {
+        expect(resolver.resolve(path).changed, isFalse, reason: path);
+      }
+    });
+
+    test('leave videos, profiles, search and the inbox alone', () {
+      for (final path in [
+        '/following',
+        '/@afl',
+        '/@afl/video/7689717987225455893',
+        '/@afl/photo/7674748465661988117',
+        '/search',
+        '/search/user?q=afl',
+        '/inbox',
+        '/profile',
+      ]) {
+        expect(resolver.resolve(path).changed, isFalse, reason: path);
+      }
+    });
+
+    test('send signed-out users to log in, except to sign in or up', () {
+      for (final path in [
+        '/',
+        '/following',
+        '/@afl',
+        '/@afl/video/7689717987225455893',
+        '/search/user?q=cats',
+      ]) {
+        expect(
+          resolver.resolve(path, signedIn: false).path,
+          '/login',
+          reason: path,
+        );
+      }
+      for (final path in [
+        '/login',
+        '/login/phone-or-email',
+        '/login/phone-or-email/email',
+        '/signup',
+        '/signup/country-selector',
+        '/oauth?code=x',
+        '/legal/terms-of-use?lang=en',
+        '/feedback/?lang=en',
+      ]) {
+        expect(
+          resolver.resolve(path, signedIn: false).changed,
+          isFalse,
+          reason: path,
+        );
+      }
+    });
+
+    test('tell signed in from signed out by TikTok\'s session cookies', () {
+      // The cookies TikTok gives a signed-out visitor.
+      final visitor = {
+        'ttwid': 'a',
+        'tt_csrf_token': 'b',
+        'tt_chain_token': 'c',
+        'msToken': 'd',
+      };
+      expect(rules.isSignedIn(visitor), isFalse);
+      expect(rules.isSignedIn({...visitor, 'sessionid': 'e'}), isTrue);
+    });
+
+    test('keep Google\'s, Facebook\'s and Apple\'s sign-in inside the app', () {
+      for (final url in [
+        // The popups "Continue with Google", "Continue with Facebook" and
+        // "Continue with Apple" open.
+        'https://accounts.google.com/v3/signin/identifier?display=popup&origin=https%3A%2F%2Fwww.tiktok.com',
+        'https://accounts.google.com/gsi/transform',
+        'https://accounts.google.com.au/accounts/SetSID?continue=x',
+        'https://oauth.facebook.com/oauth/dialog/login.php?skip_api_login=1',
+        'https://appleid.apple.com/auth/authorize?client_id=com.zhiliaoapp.musically.siwa-web',
+      ]) {
+        expect(decided(url, signedIn: false), 'allow', reason: url);
+      }
+    });
+
+    test('open share links in the app', () {
+      for (final url in [
+        'https://vm.tiktok.com/ZSHnoTq3H/',
+        'https://vt.tiktok.com/ZSHnoTq3H/',
+        // Where they redirect.
+        'https://www.tiktok.com/@/video/7621174537110949140?_r=1&u_code=x',
+      ]) {
+        expect(decided(url), 'allow', reason: url);
+      }
+    });
+
+    test('remove ads from the feed data', () {
+      final ads = rules.features.firstWhere((f) => f.id == 'hideAds');
+      expect([
+        for (final p in ads.prune) p.path,
+      ], contains('itemList.[-].isAd'));
+    });
+  });
+
   group('SiteRules.parse', () {
     test('reads a valid file', () {
       final rules = SiteRules.parse(rulesJson(revision: 7));

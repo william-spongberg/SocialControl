@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "platform": "tiktok",
+  "revision": 1,
+  "updated": "2026-10-01",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. TikTok's mobile site marks its elements with data-e2e attributes for its own tests, which outlast its generated class names, so rules target those. 'checked' means seen in a signed-in session in a browser with the engine injected; 'unverified' marks rules not yet seen working (see docs/RULES.md). You must sign in to use TikTok in the app. Continue with Google, Facebook and Apple each sign you in in a popup window, so allowedHosts lists their sign-in hosts; for now the app assumes Australia, so the only Google country domain listed is accounts.google.com.au. vm.tiktok.com and vt.tiktok.com are TikTok's share links, which redirect to www.tiktok.com. TikTok's mobile site can only search accounts (at /search/user?q=); its search box hands the search to the TikTok app, through app-va.tiktokv.com and snssdk1233.onelink.me. linkShims unwrap those to the app link inside, which appLinks sends to account search.",
+  "startUrl": "https://www.tiktok.com/",
+  "hosts": [
+    "tiktok.com",
+    "www.tiktok.com",
+    "m.tiktok.com",
+    "vm.tiktok.com",
+    "vt.tiktok.com"
+  ],
+  "allowedHosts": [
+    "accounts.google.com",
+    "accounts.youtube.com",
+    "myaccount.google.com",
+    "gds.google.com",
+    "consent.google.com",
+    "accounts.google.com.au",
+    "appleid.apple.com",
+    "oauth.facebook.com",
+    "www.facebook.com",
+    "m.facebook.com",
+    "staticxx.facebook.com"
+  ],
+  "linkShims": [
+    {
+      "host": "app-va.tiktokv.com",
+      "path": "/redirect/",
+      "param": "redirect_url",
+      "note": "Opens the TikTok app: redirect_url holds an app link such as snssdk1233://search?keyword=cats (checked)."
+    },
+    {
+      "host": "snssdk1233.onelink.me",
+      "param": "af_dp",
+      "note": "Where that redirect goes next, to open the app or its store page; af_dp holds the same app link (checked)."
+    }
+  ],
+  "appLinks": [
+    {
+      "match": "^snssdk1233://search\\?(?:[^#]*&)?keyword=([^&#]+)",
+      "to": "/search/user?q=$1",
+      "note": "A search from TikTok's search box (or a recent or suggested search) finds accounts, the only search its mobile site has (checked). Other app links are dropped."
+    }
+  ],
+  "userAgent": "browser",
+  "session": {
+    "cookies": [
+      "sessionid",
+      "sid_tt"
+    ],
+    "note": "Cookies TikTok sets once you sign in (checked signed in). A signed-out visitor gets ttwid, tt_csrf_token, tt_chain_token and msToken, but neither of these (checked)."
+  },
+  "signIn": {
+    "match": "^/(?!(?:login|signup|oauth|legal|feedback)(?:[/?]|$))",
+    "to": "/login",
+    "note": "Signed out, everything but logging in (/login/phone-or-email and the like), signing up, the sign-in callback (/oauth) and the terms and feedback pages linked from the login page goes to the login page. Signing in with Google in its popup passed only through allowed hosts (checked)."
+  },
+  "features": [
+    {
+      "id": "blockForYou",
+      "title": "Block For You",
+      "description": "Home shows videos from accounts you follow. Blocks the For You feed, also after a video someone sends you, which then plays on its own.",
+      "enabledByDefault": true,
+      "routes": [
+        {
+          "match": "^/(?:\\?.*)?$",
+          "action": "redirect",
+          "to": "/following",
+          "note": "Home, with variants such as /?_r=1, where share links land (checked)."
+        },
+        {
+          "match": "^/foryou(?:[/?]|$)",
+          "action": "block",
+          "to": "/following",
+          "label": "For You",
+          "note": "The For You feed, where /explore also lands (checked)."
+        }
+      ],
+      "hide": [
+        {
+          "selector": "a[data-e2e=\"header-foryou\"]",
+          "note": "The For You tab next to Following at the top of the feed (checked)."
+        },
+        {
+          "selector": "a[href=\"/foryou\"], a[href^=\"/foryou?\"]",
+          "note": "For You in the side menu, and any other link to it (checked)."
+        }
+      ],
+      "prune": [
+        {
+          "path": "itemList.[-].id",
+          "paths": "^/@[^/?]*/(?:video|photo)/",
+          "note": "A video's own page plays it as the first of a swipeable feed, and fills the rest from For You (/api/recommend/item_list/ and a fyp-feed-cache copy in localStorage, checked). Emptying the lists the page gets there leaves just the video, which comes from /api/item/detail/ instead."
+        },
+        {
+          "path": "hasMore",
+          "paths": "^/@[^/?]*/(?:video|photo)/",
+          "note": "So the emptied feed doesn't ask for more."
+        }
+      ]
+    },
+    {
+      "id": "hideDiscover",
+      "title": "Hide Discover",
+      "description": "Hides the Discover tab and trending searches, and blocks Discover, Explore, and the hashtag and sound feeds. Search, from the icon at the top of the feed, finds accounts.",
+      "enabledByDefault": true,
+      "routes": [
+        {
+          "match": "^/(?:discover|explore)(?:[/?]|$)",
+          "action": "block",
+          "to": "/search",
+          "label": "Discover",
+          "note": "Discover (topics and trending videos), its topic pages (/discover/travel) and Explore, which TikTok sends to For You on mobile web (checked)."
+        },
+        {
+          "match": "^/tag/",
+          "action": "block",
+          "to": "/search",
+          "label": "Hashtag feeds",
+          "note": "Videos link their hashtags here (checked)."
+        },
+        {
+          "match": "^/music/",
+          "action": "block",
+          "to": "/search",
+          "label": "Sound feeds",
+          "note": "Videos link their sound here: other people's videos with it (checked)."
+        },
+        {
+          "match": "^/search\\?(?:.*&)?q=([^&]+)",
+          "action": "redirect",
+          "to": "/search/user?q=$1",
+          "note": "A search with a query shows only its trending suggestions on mobile web, so it finds accounts instead (checked)."
+        },
+        {
+          "match": "^/search/(?!user(?:[/?]|$))[^/?]+(\\?.*)?$",
+          "action": "redirect",
+          "to": "/search/user$1",
+          "note": "Other kinds of search (/search/video, which TikTok sends home on mobile web) find accounts too (checked)."
+        }
+      ],
+      "hide": [
+        {
+          "selector": "div:has(> a[data-e2e=\"discover-icon\"])",
+          "note": "The Discover tab in the bottom bar, with its wrapper, so the bar has no gap (checked)."
+        },
+        {
+          "selector": "div:has(> [data-e2e=\"search-suggest-item\"]), div:has(+ div > div > [data-e2e=\"search-suggest-item\"])",
+          "note": "\"You may like\": trending searches on the search page, and their heading, the div just before the first one. Your recent searches and the suggestions as you type stay (checked)."
+        }
+      ]
+    },
+    {
+      "id": "hideLive",
+      "title": "Block LIVE",
+      "description": "Blocks TikTok LIVE and hides links to it.",
+      "enabledByDefault": true,
+      "routes": [
+        {
+          "match": "^/(?:@[^/?]+/)?live(?:[/?]|$)",
+          "action": "block",
+          "to": "/following",
+          "label": "LIVE",
+          "note": "The LIVE feed (/live, /live/following, /live/gaming) and someone's live stream (/@name/live). Checked."
+        }
+      ],
+      "hide": [
+        {
+          "selector": "a[href^=\"/live\"], a[href$=\"/live\"], a[href*=\"/live?\"]",
+          "note": "Links to LIVE and to people's live streams. unverified"
+        }
+      ]
+    },
+    {
+      "id": "hideSuggested",
+      "title": "Hide suggested accounts",
+      "description": "Hides the accounts TikTok suggests you follow.",
+      "enabledByDefault": true,
+      "hide": [
+        {
+          "selector": "div:has(> [data-e2e=\"suggest-accounts\"])",
+          "note": "\"Suggested accounts\" and the list under it, on the Following page while you follow nobody (checked)."
+        }
+      ]
+    },
+    {
+      "id": "hideAds",
+      "title": "Hide ads",
+      "description": "Removes ads from feeds before they show.",
+      "enabledByDefault": true,
+      "prune": [
+        {
+          "path": "itemList.[-].isAd",
+          "note": "Feed data (/api/recommend/item_list/, /api/preload/item_list/ and the For You cache) flags every video with isAd, false on all but ads, so this removes the ads, such as a bank's post flagged true among ordinary videos (checked)."
+        }
+      ]
+    },
+    {
+      "id": "hideAppPrompts",
+      "title": "Hide \"Open app\" prompts",
+      "description": "Hides buttons, banners and pop-ups that push you to the TikTok app.",
+      "enabledByDefault": true,
+      "hide": [
+        {
+          "selector": "div.matrix-smart-wrapper",
+          "note": "TikTok's open-the-app component, around every button that opens the app: in the bottom bar, at the top of the feed, in pop-ups and at the end of a profile (checked)."
+        },
+        {
+          "selector": "div:has(> div[data-e2e=\"open-titok-icon\"])",
+          "note": "The middle button in the bottom bar, which opens the app, with its wrapper, so the bar has no gap (checked)."
+        },
+        {
+          "selector": "div:has(> div > div > #login-modal > [data-e2e=\"middle-cta-container\"])",
+          "note": "The \"Get the full app experience\" pop-up, with its dark backdrop (checked)."
+        },
+        {
+          "selector": "[data-e2e=\"bottom-cta-container\"], [data-e2e=\"float-button\"], [data-e2e=\"react-app-launch\"]",
+          "note": "Banners and buttons on other pages that open the app (checked)."
+        },
+        {
+          "selector": "a[href^=\"intent:\"], a[href^=\"snssdk\"], a[href*=\"tiktokv.com/redirect\"], a[href*=\"play.google.com/store/apps\"], a[href*=\"apps.apple.com\"]",
+          "note": "Links into the app or its store pages. The app never opens intent: or snssdk links whatever this setting is; this only hides them."
+        }
+      ],
+      "hideByText": [
+        {
+          "container": "button",
+          "marker": "button",
+          "text": [
+            "Open app"
+          ],
+          "note": "The Open app button at the top of the feed, which has no data-e2e (checked)."
+        },
+        {
+          "container": "div",
+          "marker": "p",
+          "text": [
+            "Get the full app experience"
+          ],
+          "note": "The heading over an Open TikTok button, such as at the end of a profile, with the text around it (checked)."
+        },
+        {
+          "container": "[data-e2e=\"channel-item\"]",
+          "marker": "[data-e2e=\"channel-item\"] div",
+          "text": [
+            "Use TikTok app"
+          ],
+          "note": "The login page's first way to sign in, which hands you to the TikTok app. The other ways stay (checked)."
+        }
+      ],
+      "style": [
+        {
+          "selector": "body:has(#login-modal > [data-e2e=\"middle-cta-container\"])",
+          "css": "overflow: auto",
+          "note": "TikTok stops the page scrolling while the pop-up is open, and it stays open, hidden. unverified"
+        }
+      ]
+    }
+  ]
+}

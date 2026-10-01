@@ -1,19 +1,19 @@
 # Filter rules
 
-Instagram, YouTube and Reddit change their web apps often, and filters break when
-they do. This guide covers the rules format, how to check rules on a device,
+Instagram, YouTube, Reddit and TikTok change their web apps often, and filters
+break when they do. This guide covers the rules format, how to check rules,
 and how to ship a fix without an app release. For why the rules work this
 way, see [DESIGN.md](DESIGN.md).
 
 ## Where rules live
 
 - Each site has one file in `assets/rules/`, named after its platform:
-  `instagram.json`, `youtube.json` and `reddit.json`. They are bundled with
-  the app, and they are also the files you publish.
+  `instagram.json`, `youtube.json`, `reddit.json` and `tiktok.json`. They
+  are bundled with the app, and they are also the files you publish.
 - The published copies live in the folder the app is built with:
   `flutter run --dart-define=RULES_BASE_URL=https://.../assets/rules/`. The
-  app downloads `<folder>/instagram.json`, `<folder>/youtube.json` and
-  `<folder>/reddit.json`. A raw
+  app downloads `<folder>/<platform>.json` for each site, such as
+  `<folder>/tiktok.json`. A raw
   GitHub URL for the `assets/rules/` folder works. Without `RULES_BASE_URL`
   the app only uses its bundled rules.
 - For each site, the app uses whichever of the bundled and published copies
@@ -28,7 +28,7 @@ Top level:
 | Field | Meaning |
 |---|---|
 | `schemaVersion` | Format version. Apps ignore files with a version they don't know. |
-| `platform` | `"instagram"`, `"youtube"` or `"reddit"`, matching the file name. A download for another platform is rejected. |
+| `platform` | `"instagram"`, `"youtube"`, `"reddit"` or `"tiktok"`, matching the file name. A download for another platform is rejected. |
 | `revision` | Integer. Bump it on every published change. |
 | `updated`, `notes` | For people; the app ignores them. |
 | `startUrl` | Where the app opens (route rules still apply). |
@@ -157,7 +157,12 @@ every build. Never use them. YouTube's mobile site is built from custom
 elements whose names are stable (`ytm-video-with-context-renderer`,
 `ytm-shorts-lockup-view-model`, `ytm-pivot-bar-item-renderer`); prefer
 those, and its few meaningful attributes (`section-identifier`,
-`tab-title`), over its class names. In order of preference:
+`tab-title`), over its class names. TikTok marks its elements with
+`data-e2e` attributes for its own tests (`[data-e2e="header-foryou"]`,
+`[data-e2e="discover-icon"]`); use those. Where an element has none, a
+`:has()` around one, or a readable class that isn't generated
+(`div.matrix-smart-wrapper`, TikTok's open-the-app component), is next
+best. In order of preference:
 
 1. **hrefs**: `a[href^="/reels/"]`. URL structure changes least.
 2. **Roles and structure**: `article`, `[role="dialog"]`, `:has()`.
@@ -307,6 +312,26 @@ Still to check on a device:
       doesn't list them, while a subreddit and direct post open.
 - [ ] Promoted and recommended posts are absent from feeds, and ads from
       between comments.
+
+### TikTok checklist (revision 1)
+
+- [ ] Signed out, TikTok opens on its login page, and so does any other
+      TikTok page. "Use phone / email / username" and Sign up work.
+- [ ] "Continue with Google" opens Google's sign-in over TikTok, and
+      signing in there closes it and signs you in to TikTok.
+- [ ] Following shows videos from accounts you follow, and they play.
+- [ ] A TikTok share link (`vm.tiktok.com/...`) in another site opens in
+      the app's TikTok, plays on its own, and swiping up shows nothing
+      more.
+- [ ] Typing a name in search and tapping Search shows matching
+      accounts, and never opens the TikTok app or the Play Store.
+- [ ] `/foryou`, a hashtag and LIVE show "For You blocked", "Hashtag
+      feeds blocked" and "LIVE blocked".
+- [ ] No "Open app" buttons, "Get the full app experience" pop-ups or
+      ads. When an ad would have appeared, Rule diagnostics shows a match
+      for `hideAds/prune0`.
+- [ ] If TikTok asks you to drag a slider to fit a puzzle, solving it
+      works in the app.
 
 ## Fixing a broken rule
 

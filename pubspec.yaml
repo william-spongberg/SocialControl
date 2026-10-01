@@ -1,5 +1,5 @@
 name: social_control
-description: "SocialControl: calmer social media. Instagram's, YouTube's and Reddit's mobile websites in filtered WebViews, without Reels, Shorts, recommendations or ads."
+description: "SocialControl: calmer social media. Instagram's, YouTube's, Reddit's and TikTok's mobile websites in filtered WebViews, without Reels, Shorts, For You feeds, recommendations or ads."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

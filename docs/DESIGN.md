@@ -1,6 +1,6 @@
 # SocialControl design
 
-Status: MVP, Instagram, YouTube and Reddit.
+Status: MVP, Instagram, YouTube, Reddit and TikTok.
 
 ## Goal
 
@@ -16,6 +16,9 @@ built to keep them scrolling.
 - **Reddit**: keep subreddits, posts and search. Remove the For You feed,
   Popular, All, News and Explore, promoted and recommended posts, and app
   promotion prompts.
+- **TikTok**: keep the Following feed, videos people send you, profiles,
+  account search, comments and the inbox. Remove For You, Discover,
+  Explore, LIVE, hashtag and sound feeds, ads and app promotion prompts.
 
 You sign in to each site before using it, so the app shows your own
 accounts, never a site's public pages for visitors.
@@ -33,7 +36,7 @@ browser with rules.
 ```
 Flutter app
 ├── ShellScreen ──────────── site picker at launch, then the picked site
-│   ├── SitePicker ───────── pick Instagram, YouTube or Reddit (lib/src/ui/site_picker.dart)
+│   ├── SitePicker ───────── pick a site (lib/src/ui/site_picker.dart)
 │   ├── slim bar ─────────── site switcher, reload, settings
 │   └── SiteView (per site) ─ kept alive once opened (lib/src/ui/site_view.dart)
 │       ├── UrlPolicy ─────── decides full page loads (lib/src/webview/url_policy.dart)
@@ -64,9 +67,9 @@ slim bar switches between sites.
 
 ### Signing in
 
-Signed out, every page goes to the site's sign-in page: Instagram's and
-Reddit's login pages, and YouTube's You page, which says you aren't signed
-in and has YouTube's Sign in button. The pages that signing in needs, such
+Signed out, every page goes to the site's sign-in page: Instagram's,
+Reddit's and TikTok's login pages, and YouTube's You page, which says you
+aren't signed in and has YouTube's Sign in button. The pages that signing in needs, such
 as signing up and resetting a password, stay open. This is `signIn` in the
 rules: it is always on and comes before the features' routes, so switching
 a filter off can't get round it.
@@ -116,8 +119,8 @@ fix that needs new behaviour means an engine change and an app release. See
 
 ### Enforcement layers
 
-Instagram, YouTube and Reddit are single-page apps: the page loads once, and
-navigation happens through `history.pushState`. No single hook sees
+The sites are single-page apps: the page loads once, and navigation
+happens through `history.pushState`. No single hook sees
 everything, so filtering is layered:
 
 | Layer | Where | Catches |
@@ -126,7 +129,7 @@ everything, so filtering is layered:
 | Capture-phase click listener | engine | links to blocked pages, before the site's router sees the click |
 | `pushState`/`replaceState` hooks, `popstate` listener | engine | navigation not started by a link, back/forward |
 | MutationObserver | engine | text-labelled content as the feed streams in |
-| `JSON.parse`/`Response.json` wrappers | engine | data injected into API responses (story ads, video ads), before it renders |
+| `JSON.parse`/`Response.json` wrappers | engine | data injected into API responses (story ads, video ads, TikTok's For You videos after a shared one), before it renders |
 | Setters on named globals | engine | data a page embeds as a script literal (`ytInitialPlayerResponse`) |
 | `shouldOverrideUrlLoading` | app | full page loads, deep links, other sites, app links |
 
@@ -174,10 +177,11 @@ redirects in a row with no tap or key press in between).
 ### Navigation and links
 
 - A site's own hosts load in its WebView, along with the hosts its rules
-  allow, such as Accounts Center and Facebook's login for Instagram, and
-  Google's sign-in pages for YouTube and Reddit. A sign-in provider is only
-  allowed for a site that uses it, so a link to Facebook in a Reddit post
-  opens in the browser. Google's sign-in passes through the user's country
+  allow, such as Accounts Center and Facebook's login for Instagram,
+  Google's sign-in pages for YouTube and Reddit, and Google's, Facebook's
+  and Apple's for TikTok. A sign-in provider is only allowed for a site
+  that uses it, so a link to Facebook in a Reddit post opens in the
+  browser. Google's sign-in passes through the user's country
   domain; the app assumes Australia for now, so only
   `accounts.google.com.au` is listed.
 - A link that asks for a new window (`target="_blank"`, as every outbound
@@ -189,7 +193,9 @@ redirects in a row with no tap or key press in between).
 - A link to another site in the app opens there: a YouTube link in an
   Instagram bio switches to the app's YouTube, not the YouTube app.
 - Every other site opens in the system browser. Outbound-link redirectors
-  (`l.instagram.com`, `youtube.com/redirect`) are unwrapped first.
+  (`l.instagram.com`, `youtube.com/redirect`) are unwrapped first, and so
+  are TikTok's open-the-app redirectors (`app-va.tiktokv.com/redirect/`,
+  `snssdk1233.onelink.me`), which leaves the app link inside.
 - The policy sees every step of a redirect chain, not just where it starts:
   on Android, flutter_inappwebview cancels each main-frame navigation, asks
   the app, and restarts it if allowed. So a sign-in flow only completes if
@@ -206,9 +212,13 @@ redirects in a row with no tap or key press in between).
   has the engine remember the fixed bar from the page before and show a
   copy of it there; the site's styles still apply to the copy, and the
   engine navigates for its links, in-page as above.
-- `intent:`, `instagram:` and `vnd.youtube:` links are never followed: the
-  app never sends you into an official app. Where the rules map an app
-  link to a page of the site (`appLinks`), it opens that page instead.
+- `intent:`, `instagram:`, `vnd.youtube:` and `snssdk1233:` links are never
+  followed: the app never sends you into an official app. Where the rules
+  map an app link to a page of the site (`appLinks`), it opens that page
+  instead. TikTok's mobile site can't search videos, and its search box
+  hands every search to the TikTok app (`snssdk1233://search?keyword=...`),
+  so the app shows the matching accounts (`/search/user?q=...`), the one
+  search the mobile site has.
 
 ### Fullscreen video
 
@@ -277,12 +287,21 @@ page.
 
 **The Following feed as Home; Subscriptions as Home.** `/?variant=following`
 is Instagram's own chronological feed of accounts you follow,
-`/feed/subscriptions` is YouTube's, and `/?feed=following` opens Reddit's
-Home on its Following tab. Redirecting to them is a stable URL hook, which
-is more robust than hiding suggestions item by item. Hiding Reddit's
-recommended posts inside its For You feed was tried first: with most posts
-hidden, the page stays short, Reddit's load-more trigger stays in view and
-never fires again, and the feed stops after two pages.
+`/feed/subscriptions` is YouTube's, `/?feed=following` opens Reddit's
+Home on its Following tab, and `/following` is TikTok's. Redirecting to
+them is a stable URL hook, which is more robust than hiding suggestions
+item by item. Hiding Reddit's recommended posts inside its For You feed
+was tried first: with most posts hidden, the page stays short, Reddit's
+load-more trigger stays in view and never fires again, and the feed stops
+after two pages.
+
+**TikTok's mobile site.** TikTok marks its elements with `data-e2e`
+attributes for its own tests, which outlast its generated class names, so
+rules target those. A video's own page plays the video first in a
+swipeable feed and fills the rest from For You, so on video pages a prune
+rule limited to those pages (`paths`) empties the item lists the page
+gets; the video itself comes from a different request and plays on its
+own.
 
 **YouTube's mobile site.** `m.youtube.com` is built from custom elements
 (`ytm-video-with-context-renderer`, `ytm-shorts-lockup-view-model`) whose
@@ -322,6 +341,11 @@ threads. The bar has a reload button instead.
   who use Reddit's cookies in their own tools. If Reddit sends you to its
   login page while you're signed in, see the Reddit checklist in
   [RULES.md](RULES.md).
+- **TikTok's mobile site is a cut-down TikTok.** It has no messages (the
+  Inbox shows notifications), no posting (its middle button only opens
+  the app, so the app hides it) and no video search: search finds
+  accounts. TikTok sometimes asks you to drag a slider to fit a puzzle
+  before it shows videos.
 - **Single sign-on leaves the app.** A work account that signs in through
   another company's login page (Google Workspace with Okta or Microsoft,
   say) redirects to a host the rules don't list, which opens in the

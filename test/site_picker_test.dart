@@ -43,8 +43,9 @@ void main() {
     expect(find.text('Instagram'), findsOneWidget);
     expect(find.text('YouTube'), findsOneWidget);
     expect(find.text('Reddit'), findsOneWidget);
+    expect(find.text('TikTok'), findsOneWidget);
     // The helper rules have two filters, both on by default.
-    expect(find.text('2 of 2 filters on'), findsNWidgets(3));
+    expect(find.text('2 of 2 filters on'), findsNWidgets(4));
 
     await tester.tap(find.text('YouTube'));
     expect(picked, [1]);

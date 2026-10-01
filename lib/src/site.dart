@@ -32,6 +32,11 @@ const List<SiteInfo> siteCatalog = [
     icon: Icons.smart_display_outlined,
   ),
   SiteInfo(platform: 'reddit', name: 'Reddit', icon: Icons.forum_outlined),
+  SiteInfo(
+    platform: 'tiktok',
+    name: 'TikTok',
+    icon: Icons.music_video_outlined,
+  ),
 ];
 
 /// A site with its rules and the user's filter choices for it.
