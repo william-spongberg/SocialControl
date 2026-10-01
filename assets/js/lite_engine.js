@@ -724,9 +724,10 @@ function liteEngine(input, env) {
   // Instagram injects into its API responses. A path is property names
   // joined by dots, where `[]` means every element of an array and `[-]`
   // removes the array elements in which the rest of the path leads to a
-  // value other than null:
+  // value other than null or false:
   //   data.xdt_injected_story_units.ad_media_items
   //   data.feed.edges.[-].node.ad
+  //   itemList.[-].isAd
   // A rule with `global` applies to the value a page assigns to that global
   // variable instead of to JSON, for data embedded in a script, such as
   // `var ytInitialPlayerResponse = {...}` on YouTube. A rule with `paths`
@@ -814,9 +815,10 @@ function liteEngine(input, env) {
   }
 
   // Whether the rest of the path leads to a value. APIs often send every
-  // field and set the unused ones to null, so null doesn't count.
+  // field and set the unused ones to null, or a flag such as isAd to false
+  // on every item but the ones it marks, so neither counts.
   function pathExists(value, segments, index) {
-    if (index === segments.length) return value !== null && value !== undefined;
+    if (index === segments.length) return value !== null && value !== undefined && value !== false;
     if (value === null || typeof value !== 'object') return false;
     var segment = segments[index];
     if (segment === '[]' || segment === '[-]') {

@@ -443,6 +443,16 @@ describe('prune rules', () => {
     assert.deepEqual(Array.from(feed.edges, (e) => e.node.media && e.node.media.id), [1, 3]);
   });
 
+  test('keep array elements whose path leads to false', () => {
+    // TikTok marks every feed item with isAd, false on all but the ads.
+    const page = boot({ config: { prune: [{ id: 'feedAds', path: 'itemList.[-].isAd' }] } });
+    const feed = page.window.JSON.parse(
+      '{"itemList":[{"id":1,"isAd":false},{"id":2,"isAd":true},{"id":3},{"id":4,"isAd":false}]}',
+    );
+    assert.deepEqual(Array.from(feed.itemList, (item) => item.id), [1, 3, 4]);
+    assert.equal(page.engine.stats().prune[0].matches, 1);
+  });
+
   test('apply a rule with paths only on the pages it names', () => {
     // TikTok fills a video's page with For You videos after it.
     const page = boot({

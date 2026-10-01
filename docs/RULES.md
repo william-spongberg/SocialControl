@@ -96,12 +96,16 @@ user's choice is stored, so never rename one), a `title`, a `description`,
   responses.
 - `path` is property names joined by dots. `[]` means every element of an
   array, and `[-]` removes the array elements in which the rest of the path
-  leads to a value other than `null`:
+  leads to a value other than `null` or `false`:
   - `data.xdt_injected_story_units.ad_media_items` deletes that property.
   - `data.feed.edges.[-].node.ad` removes every edge whose node has an `ad`.
     Instagram's feed items have every slot (`media`, `ad`,
     `suggested_users`, ...) and set the unused ones to `null`, so a `null`
     doesn't count.
+  - `itemList.[-].isAd` removes every item flagged as an ad. TikTok sends
+    `isAd` with every video, `false` on all but the ads, so a `false`
+    doesn't count either. Apps before v0.3 count `false`, so only use a
+    `false` flag in a site that those apps don't have.
 - With `"global": "name"`, the rule applies to the value a page script
   assigns to that global variable, instead of to JSON. YouTube embeds its
   player data on a full page load as `var ytInitialPlayerResponse = {...}`,

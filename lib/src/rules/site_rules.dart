@@ -513,7 +513,8 @@ class TextHideRule {
 ///
 /// [path] is property names joined by dots. `[]` means every element of an
 /// array, and `[-]` removes the array elements in which the rest of the path
-/// exists: `data.feed.edges.[-].node.ad` drops every ad edge.
+/// leads to a value other than null or false: `data.feed.edges.[-].node.ad`
+/// drops every ad edge, and `itemList.[-].isAd` every item flagged as an ad.
 ///
 /// With [global], the rule applies to the value the page assigns to that
 /// global variable instead of to JSON, for data a page embeds as a script
