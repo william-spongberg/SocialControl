@@ -98,7 +98,7 @@ formatting; `make lint` runs the analyzer alone.
 
 ## Releases
 
-The latest Android build is available as [v0.2](https://github.com/william-spongberg/SocialControl/releases/tag/v0.2).
+The latest Android build is available as [v0.3](https://github.com/william-spongberg/SocialControl/releases/tag/v0.3).
 
 ## Project layout
 
