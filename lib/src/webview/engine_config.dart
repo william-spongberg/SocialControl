@@ -88,6 +88,7 @@ class EngineConfig {
           'id': '${feature.id}/prune$i',
           'path': p.path,
           'global': p.global,
+          'paths': p.paths,
         });
       }
     }

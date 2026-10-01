@@ -443,6 +443,22 @@ describe('prune rules', () => {
     assert.deepEqual(Array.from(feed.edges, (e) => e.node.media && e.node.media.id), [1, 3]);
   });
 
+  test('apply a rule with paths only on the pages it names', () => {
+    // TikTok fills a video's page with For You videos after it.
+    const page = boot({
+      url: 'https://www.instagram.com/@someone/video/1',
+      config: { prune: [{ id: 'forYou', path: 'itemList.[-].id', paths: '^/@[^/?]*/video/' }] },
+    });
+    const { window } = page;
+    const list = '{"itemList":[{"id":"1"},{"id":"2"}],"hasMore":true}';
+    assert.equal(window.JSON.parse(list).itemList.length, 0);
+    window.history.pushState(null, '', '/following');
+    assert.equal(window.JSON.parse(list).itemList.length, 2);
+    assert.deepEqual(Array.from(page.engine.stats().prune, (p) => ({ ...p })), [
+      { id: 'forYou', active: false, matches: 2 },
+    ]);
+  });
+
   test('leave parsing otherwise unchanged', () => {
     const page = boot({ config: { prune: [storyAds] } });
     const { window } = page;

@@ -184,7 +184,7 @@ void main() {
       expect((json['hideByText'] as List).single['collapse'], isTrue);
     });
 
-    test('passes prune rules through with ids', () {
+    test('passes prune rules through with ids and pages', () {
       final rules = SiteRules.parse(
         rulesJson(
           features: [
@@ -195,6 +195,7 @@ void main() {
               'prune': [
                 {'path': 'data.a.b'},
                 {'path': 'adPlacements', 'global': 'ytInitialPlayerResponse'},
+                {'path': 'itemList.[-].id', 'paths': '^/@[^/]*/video/'},
               ],
             },
           ],
@@ -204,11 +205,18 @@ void main() {
           jsonDecode(EngineConfig.build(rules, {'ads'}).json)
               as Map<String, dynamic>;
       expect(json['prune'], [
-        {'id': 'ads/prune0', 'path': 'data.a.b', 'global': null},
+        {'id': 'ads/prune0', 'path': 'data.a.b', 'global': null, 'paths': null},
         {
           'id': 'ads/prune1',
           'path': 'adPlacements',
           'global': 'ytInitialPlayerResponse',
+          'paths': null,
+        },
+        {
+          'id': 'ads/prune2',
+          'path': 'itemList.[-].id',
+          'global': null,
+          'paths': '^/@[^/]*/video/',
         },
       ]);
       final off =

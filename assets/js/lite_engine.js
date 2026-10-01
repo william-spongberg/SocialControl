@@ -152,10 +152,13 @@ function liteEngine(input, env) {
 
     var prune = [];
     (raw.prune || []).forEach(function (r) {
+      var paths = regex(r.paths, r.id);
+      if (!paths.ok) return;
       prune.push({
         id: r.id,
         segments: String(r.path).split('.'),
         global: typeof r.global === 'string' && r.global ? r.global : null,
+        paths: paths.re,
         removed: 0,
       });
     });
@@ -726,7 +729,9 @@ function liteEngine(input, env) {
   //   data.feed.edges.[-].node.ad
   // A rule with `global` applies to the value a page assigns to that global
   // variable instead of to JSON, for data embedded in a script, such as
-  // `var ytInitialPlayerResponse = {...}` on YouTube.
+  // `var ytInitialPlayerResponse = {...}` on YouTube. A rule with `paths`
+  // only applies while the page's path and query match, such as TikTok's
+  // For You videos, which it loads after a video someone sends you.
   function hookJson() {
     var parse = JSON.parse;
     JSON.parse = function () {
@@ -766,9 +771,14 @@ function liteEngine(input, env) {
   function pruneValue(value, global) {
     if (value === null || typeof value !== 'object') return value;
     var target = global || null;
+    var path = null;
     for (var i = 0; i < config.prune.length; i++) {
       var rule = config.prune[i];
       if (rule.global !== target) continue;
+      if (rule.paths) {
+        if (path === null) path = currentPath();
+        if (!rule.paths.test(path)) continue;
+      }
       try {
         rule.removed += pruneAt(value, rule.segments, 0);
       } catch (e) {
@@ -907,7 +917,7 @@ function liteEngine(input, env) {
       }),
       // Pruned counts are since the page loaded, not just this route.
       prune: config.prune.map(function (r) {
-        return { id: r.id, active: true, matches: r.removed };
+        return { id: r.id, active: !r.paths || r.paths.test(path), matches: r.removed };
       }),
       keep: config.keep.map(function (k) {
         return {

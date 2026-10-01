@@ -517,9 +517,10 @@ class TextHideRule {
 ///
 /// With [global], the rule applies to the value the page assigns to that
 /// global variable instead of to JSON, for data a page embeds as a script
-/// (such as YouTube's `ytInitialPlayerResponse`).
+/// (such as YouTube's `ytInitialPlayerResponse`). With [paths], it only
+/// applies while the page's path and query match that pattern.
 class PruneRule {
-  PruneRule({required this.path, this.global});
+  PruneRule({required this.path, this.global, this.paths});
 
   factory PruneRule._fromJson(_Reader r) {
     final path = r.string('path');
@@ -537,11 +538,16 @@ class PruneRule {
         '${r.path}global: must be a JavaScript variable name',
       );
     }
-    return PruneRule(path: path, global: global);
+    return PruneRule(
+      path: path,
+      global: global,
+      paths: r.optionalPattern('paths'),
+    );
   }
 
   final String path;
   final String? global;
+  final String? paths;
 }
 
 /// Puts back a site's tab bar on pages where the site drops it, such as

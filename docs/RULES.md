@@ -89,7 +89,7 @@ user's choice is stored, so never rename one), a `title`, a `description`,
 - `collapse` works as it does for `hide`. Set it when the container is a
   post.
 
-**`prune`**: `{ "path" }`
+**`prune`**: `{ "path", "global"?, "paths"? }`
 
 - Deletes data from the site's JSON (`JSON.parse` and `fetch` responses)
   before the page renders it, such as story ads injected into API
@@ -109,6 +109,12 @@ user's choice is stored, so never rename one), a `title`, a `description`,
   forms: `{ "path": "adPlacements" }` for data fetched while you browse,
   and `{ "path": "adPlacements", "global": "ytInitialPlayerResponse" }`
   for the first page.
+- With `paths` (a regular expression like a route's `match`), the rule only
+  applies while the page's path and query match it. A TikTok video's own
+  page fills the rest of its feed with For You videos, so `itemList.[-].id`
+  with `"paths": "^/@[^/?]*/(?:video|photo)/"` empties those lists there
+  and nowhere else. Apps before v0.3 ignore `paths` and apply the rule
+  everywhere.
 - To find paths, open the Network panel in the inspector (see below), find
   the response carrying the unwanted item, and note the property path. The
   uBlock Origin and AdGuard filter lists are also good sources (their

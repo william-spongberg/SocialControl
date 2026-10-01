@@ -997,6 +997,29 @@ void main() {
       expect(plain.features.first.keep, isEmpty);
     });
 
+    test('reads prune rules limited to some pages', () {
+      Map<String, dynamic> withPaths(String paths) => _json(
+        features: [
+          {
+            'id': 'forYou',
+            'title': 'Block For You',
+            'enabledByDefault': true,
+            'prune': [
+              {'path': 'itemList.[-].id', 'paths': paths},
+            ],
+          },
+        ],
+      );
+      final rule = SiteRules.fromJson(
+        withPaths('^/@[^/?]*/video/'),
+      ).features.single.prune.single;
+      expect(rule.paths, '^/@[^/?]*/video/');
+      expect(
+        () => SiteRules.fromJson(withPaths('([')),
+        _formatError('prune[0].paths: invalid pattern'),
+      );
+    });
+
     test('ignores fields it does not know', () {
       final json = _json()..['somethingNew'] = {'a': 1};
       expect(SiteRules.fromJson(json).revision, 1);
