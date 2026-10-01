@@ -104,6 +104,37 @@ void main() {
       expect(decide('instagram://user?username=someone'), isA<NavCancel>());
     });
 
+    test('opens an app link as the page the rules map it to', () {
+      final json = jsonDecode(rulesJson()) as Map<String, dynamic>
+        ..['appLinks'] = [
+          {'match': r'^instagram://user\?username=([\w.]+)', 'to': r'/$1/'},
+        ]
+        ..['linkShims'] = [
+          {'host': 'app.example', 'param': 'deep'},
+        ];
+      final linkRules = SiteRules.fromJson(json);
+      final linkPolicy = UrlPolicy(
+        linkRules,
+        EngineConfig.build(linkRules, {'hideReels'}).resolver,
+      );
+      NavDecision open(String url) =>
+          linkPolicy.decide(Uri.parse(url), isMainFrame: true);
+      expect(
+        (open('instagram://user?username=some.one') as NavRedirect).url
+            .toString(),
+        'https://www.instagram.com/some.one/',
+      );
+      // Also inside a redirector, and with the site's routes applied.
+      expect(
+        (open('https://app.example/?deep=instagram%3A%2F%2Fuser%3Fusername%3Dreels')
+                as NavRedirect)
+            .blockedLabel,
+        'Reels',
+      );
+      // Any other app link is dropped.
+      expect(open('instagram://media?id=1'), isA<NavCancel>());
+    });
+
     test('opens other sites and mail links outside the app', () {
       final other = decide('https://example.com/article');
       expect(other, isA<NavOpenExternal>());

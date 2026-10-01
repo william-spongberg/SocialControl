@@ -207,7 +207,8 @@ redirects in a row with no tap or key press in between).
   copy of it there; the site's styles still apply to the copy, and the
   engine navigates for its links, in-page as above.
 - `intent:`, `instagram:` and `vnd.youtube:` links are never followed: the
-  app never sends you into an official app.
+  app never sends you into an official app. Where the rules map an app
+  link to a page of the site (`appLinks`), it opens that page instead.
 
 ### Fullscreen video
 

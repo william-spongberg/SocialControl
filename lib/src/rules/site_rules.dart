@@ -58,6 +58,7 @@ class SiteRules {
     this.session,
     this.signIn,
     this.popstateNavigation = false,
+    this.appLinks = const [],
   });
 
   factory SiteRules.parse(String source) {
@@ -141,6 +142,10 @@ class SiteRules {
         for (final (i, s) in r.objects('linkShims', required: false).indexed)
           LinkShim._fromJson(_Reader(s, 'linkShims[$i].')),
       ],
+      appLinks: [
+        for (final (i, a) in r.objects('appLinks', required: false).indexed)
+          AppLink._fromJson(_Reader(a, 'appLinks[$i].')),
+      ],
       userAgent: r.enumValue(
         'userAgent',
         UserAgentMode.values,
@@ -171,6 +176,10 @@ class SiteRules {
   /// Redirect services that wrap outbound links. The app unwraps them and
   /// opens the destination directly.
   final List<LinkShim> linkShims;
+
+  /// Links into the site's own app that open a page of the site instead.
+  /// The app never opens other app links.
+  final List<AppLink> appLinks;
   final UserAgentMode userAgent;
   final List<Feature> features;
 
@@ -591,6 +600,46 @@ class LinkShim {
 
   bool matches(Uri url) =>
       url.host.toLowerCase() == host && (path == null || url.path == path);
+}
+
+/// A link into the site's own app, such as `snssdk1233://search?keyword=x`
+/// from TikTok's search box, that opens a page of the site instead.
+///
+/// [match] is tested against the whole link; [to] is a path on the site,
+/// which can use `$1` to `$9` for [match]'s capture groups.
+class AppLink {
+  AppLink({required this.match, required this.to});
+
+  factory AppLink._fromJson(_Reader r) {
+    final match = r.pattern('match');
+    final to = r.string('to');
+    if (!to.startsWith('/')) {
+      throw RulesFormatException('${r.path}to: must start with /');
+    }
+    final groups = RegExp('(?:$match)|').firstMatch('')!.groupCount;
+    for (final reference in groupReference.allMatches(to)) {
+      if (int.parse(reference[1]!) > groups) {
+        throw RulesFormatException(
+          '${r.path}to: ${reference[0]} refers to a group that match '
+          'doesn\'t have',
+        );
+      }
+    }
+    return AppLink(match: match, to: to);
+  }
+
+  final String match;
+  final String to;
+
+  /// The site path that [link] opens, or null if it isn't this app link.
+  String? pathFor(Uri link) {
+    final found = RegExp(match).firstMatch(link.toString());
+    if (found == null) return null;
+    return to.replaceAllMapped(
+      groupReference,
+      (reference) => found.group(int.parse(reference[1]!)) ?? '',
+    );
+  }
 }
 
 /// Reads typed fields and reports errors with the field's path.

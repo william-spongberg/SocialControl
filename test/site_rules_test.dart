@@ -997,6 +997,34 @@ void main() {
       expect(plain.features.first.keep, isEmpty);
     });
 
+    test('reads app links, and fills in their groups', () {
+      final json = _json()
+        ..['appLinks'] = [
+          {
+            'match': r'^snssdk1233://search\?(?:[^#]*&)?keyword=([^&#]+)',
+            'to': r'/search/user?q=$1',
+          },
+        ];
+      final link = SiteRules.fromJson(json).appLinks.single;
+      expect(
+        link.pathFor(Uri.parse('snssdk1233://search?keyword=cats&refer=web')),
+        '/search/user?q=cats',
+      );
+      expect(link.pathFor(Uri.parse('snssdk1233://user/profile/1')), isNull);
+      expect(SiteRules.parse(rulesJson()).appLinks, isEmpty);
+
+      ((json['appLinks'] as List)[0] as Map)['to'] = 'https://x.example/';
+      expect(
+        () => SiteRules.fromJson(json),
+        _formatError('appLinks[0].to: must start with /'),
+      );
+      ((json['appLinks'] as List)[0] as Map)['to'] = r'/search/user?q=$2';
+      expect(
+        () => SiteRules.fromJson(json),
+        _formatError('appLinks[0].to: \$2 refers to a group'),
+      );
+    });
+
     test('reads prune rules limited to some pages', () {
       Map<String, dynamic> withPaths(String paths) => _json(
         features: [

@@ -11,7 +11,8 @@ class NavAllow extends NavDecision {
 }
 
 /// Drop the navigation. Used for app links such as `intent:` and
-/// `instagram:`, which would open the official app.
+/// `instagram:`, which would open the official app, unless the rules map
+/// them to a page of the site.
 class NavCancel extends NavDecision {
   const NavCancel();
 }
@@ -62,7 +63,7 @@ class UrlPolicy {
     final scheme = url.scheme.toLowerCase();
     if (_passThroughSchemes.contains(scheme)) return const NavAllow();
     if (_externalSchemes.contains(scheme)) return NavOpenExternal(url);
-    if (scheme != 'http' && scheme != 'https') return const NavCancel();
+    if (scheme != 'http' && scheme != 'https') return _appLink(url, signedIn);
 
     for (final shim in rules.linkShims) {
       if (!shim.matches(url)) continue;
@@ -81,6 +82,21 @@ class UrlPolicy {
     }
     if (rules.isAllowedHost(url.host)) return const NavAllow();
     return NavOpenExternal(url);
+  }
+
+  /// An app link opens the page of the site that the rules map it to, and is
+  /// otherwise dropped: the app never opens the site's own app.
+  NavDecision _appLink(Uri url, bool signedIn) {
+    for (final link in rules.appLinks) {
+      final path = link.pathFor(url);
+      if (path == null) continue;
+      final page = rules.startUrl.resolve(path);
+      return switch (decide(page, isMainFrame: true, signedIn: signedIn)) {
+        NavAllow() => NavRedirect(page),
+        final decision => decision,
+      };
+    }
+    return const NavCancel();
   }
 
   (Uri, String?) _resolved(Uri url, bool signedIn) {
