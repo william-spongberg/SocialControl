@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "platform": "reddit",
-  "revision": 3,
-  "updated": "2026-09-30",
-  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. Public Reddit mobile web needs no sign-in, but normal Reddit sign-in remains available. App-promotion hooks were checked on mobile web 2026-09-30; other selectors are unverified against future site changes.",
+  "revision": 4,
+  "updated": "2026-10-01",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. Public Reddit mobile web needs no sign-in, but normal Reddit sign-in remains available. App-promotion hooks were checked on mobile web; other selectors are unverified against future site changes.",
   "startUrl": "https://www.reddit.com/",
   "hosts": [
     "reddit.com",
@@ -97,7 +97,7 @@
       "hide": [
         {
           "selector": "#xpromo-small-header, #open-app-header-cta, div.configured-xpromo-bottom-sheet",
-          "note": "The top-right Open App control and the bottom-sheet popup, checked on mobile web 2026-09-30."
+          "note": "The top-right Open App control and the bottom-sheet popup, checked on mobile web."
         }
       ]
     }

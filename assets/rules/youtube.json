@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "platform": "youtube",
-  "revision": 2,
-  "updated": "2026-09-30",
-  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. m.youtube.com renders custom elements (ytm-*, *-view-model) whose names are stable across builds, unlike its class names. 'checked 2026-09-30' means the selector or path was seen on logged-out mobile web on that date; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). Sign-in is intentionally restricted to .com hosts for now, so country-specific Google domains open externally instead of creating a redirect loop.",
+  "revision": 3,
+  "updated": "2026-10-01",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. m.youtube.com renders custom elements (ytm-*, *-view-model) whose names are stable across builds, unlike its class names. 'checked' means the selector or path was seen on logged-out mobile web; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). Sign-in is intentionally restricted to .com hosts for now, so country-specific Google domains open externally instead of creating a redirect loop.",
   "startUrl": "https://m.youtube.com/",
   "hosts": [
     "youtube.com",
@@ -69,13 +69,13 @@
           "action": "redirect",
           "to": "/feed/library",
           "signedOut": true,
-          "note": "Signed out, Subscriptions is blank. The You tab's page says you aren't signed in and has YouTube's Sign in button. Checked on logged-out mobile web, 2026-09-30."
+          "note": "Signed out, Subscriptions is blank. The You tab's page says you aren't signed in and has YouTube's Sign in button. Checked on logged-out mobile web."
         }
       ],
       "hide": [
         {
           "selector": "ytm-pivot-bar-item-renderer:has(> .pivot-w2w)",
-          "note": "The Home tab in the bottom bar (w2w is \"what to watch\"). Checked 2026-09-30."
+          "note": "The Home tab in the bottom bar (w2w is \"what to watch\"). Checked."
         }
       ]
     },
@@ -89,7 +89,7 @@
           "match": "^/shorts/([A-Za-z0-9_-]+)",
           "action": "redirect",
           "to": "/watch?v=$1",
-          "note": "A single Short opens in the normal player, where there is nothing to swipe to. /watch?v= renders a Short as a normal video: checked 2026-09-30."
+          "note": "A single Short opens in the normal player, where there is nothing to swipe to. /watch?v= renders a Short as a normal video: checked."
         },
         {
           "match": "^/shorts/?(?:\\?.*)?$",
@@ -107,15 +107,15 @@
       "hide": [
         {
           "selector": "ytm-pivot-bar-item-renderer:has(> .pivot-shorts)",
-          "note": "The Shorts tab in the bottom bar. Checked 2026-09-30."
+          "note": "The Shorts tab in the bottom bar. Checked."
         },
         {
           "selector": "ytm-reel-shelf-renderer",
-          "note": "Shorts shelves, e.g. on channel pages. Checked 2026-09-30."
+          "note": "Shorts shelves, e.g. on channel pages. Checked."
         },
         {
           "selector": "grid-shelf-view-model:has(ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2)",
-          "note": "Shorts grids in search results. Checked 2026-09-30."
+          "note": "Shorts grids in search results. Checked."
         },
         {
           "selector": "ytm-rich-section-renderer:has(ytm-reel-shelf-renderer, ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2)",
@@ -123,7 +123,7 @@
         },
         {
           "selector": "ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2, ytm-reel-item-renderer",
-          "note": "Single Shorts tiles anywhere. The first checked 2026-09-30; the others are older and newer forms from community filter lists."
+          "note": "Single Shorts tiles anywhere. The first is checked; the others are older and newer forms from community filter lists."
         },
         {
           "selector": ":is(ytm-video-with-context-renderer, ytm-rich-item-renderer, ytm-compact-video-renderer):has(a[href^=\"/shorts/\"])",
@@ -131,7 +131,7 @@
         },
         {
           "selector": "yt-tab-shape[tab-title=\"Shorts\"]",
-          "note": "A channel's Shorts tab. The label is \"Shorts\" in most languages. Checked 2026-09-30."
+          "note": "A channel's Shorts tab. The label is \"Shorts\" in most languages. Checked."
         }
       ]
     },
@@ -143,7 +143,7 @@
       "hide": [
         {
           "selector": ".related-items-container, ytm-item-section-renderer[section-identifier=\"related-items\"]",
-          "note": "The recommendations under the player; the comments section is separate. Checked 2026-09-30."
+          "note": "The recommendations under the player; the comments section is separate. Checked."
         },
         {
           "selector": "ytm-search ytm-shelf-renderer",
@@ -154,21 +154,21 @@
         {
           "selector": ".related-chips-slot-wrapper.slot-open",
           "css": "transform: none",
-          "note": "Fullscreen makes YouTube slide the video's details up into the header's space (slot-open), and it only slides them back as you scroll. With the suggestions hidden, the watch page is too short to scroll, so after fullscreen the title stayed under the video. Seen signed in on 2026-09-30; YouTube only builds this wrapper for signed-in viewers."
+          "note": "Fullscreen makes YouTube slide the video's details up into the header's space (slot-open), and it only slides them back as you scroll. With the suggestions hidden, the watch page is too short to scroll, so after fullscreen the title stayed under the video. Seen signed in; YouTube only builds this wrapper for signed-in viewers."
         }
       ],
       "prune": [
         {
           "path": "contents.singleColumnWatchNextResults.autoplay",
-          "note": "The next video that autoplay would play. Path checked 2026-09-30; the effect on playback is unverified."
+          "note": "The next video that autoplay would play. Path checked; the effect on playback is unverified."
         },
         {
           "path": "playerOverlays.playerOverlayRenderer.autoplay",
-          "note": "The \"Up next\" countdown at the end of a video. Path checked 2026-09-30; effect unverified."
+          "note": "The \"Up next\" countdown at the end of a video. Path checked; effect unverified."
         },
         {
           "path": "playerOverlays.playerOverlayRenderer.endScreen",
-          "note": "The grid of suggested videos at the end of a video. Path checked 2026-09-30; effect unverified."
+          "note": "The grid of suggested videos at the end of a video. Path checked; effect unverified."
         }
       ]
     },
@@ -195,7 +195,7 @@
           "action": "block",
           "to": "/feed/subscriptions",
           "label": "Hashtag feeds",
-          "note": "Video descriptions link hashtags here (checked 2026-09-30)."
+          "note": "Video descriptions link hashtags here (checked)."
         }
       ]
     },
@@ -207,7 +207,7 @@
       "hide": [
         {
           "selector": "ytm-companion-slot",
-          "note": "The ad slot between the player and the video's title. Present, empty, when logged out: checked 2026-09-30."
+          "note": "The ad slot between the player and the video's title. Present, empty, when logged out: checked."
         },
         {
           "selector": "ytm-promoted-sparkles-web-renderer, ytm-promoted-sparkles-text-search-renderer, ytm-promoted-video-renderer, ytm-companion-ad-renderer, ytm-display-ad-renderer, ytm-ad-slot-renderer, ad-slot-renderer, ytm-in-feed-ad-layout-renderer, ytm-statement-banner-renderer, ytm-brand-video-singleton-renderer, ytm-merch-shelf-renderer",
@@ -241,7 +241,7 @@
         {
           "path": "adPlacements",
           "global": "ytInitialPlayerResponse",
-          "note": "The same data on a full page load, where the page assigns it to this global as a script literal instead of parsing JSON (checked 2026-09-30)."
+          "note": "The same data on a full page load, where the page assigns it to this global as a script literal instead of parsing JSON (checked)."
         },
         {
           "path": "playerAds",
@@ -261,7 +261,7 @@
       "hide": [
         {
           "selector": "yt-video-metadata-carousel-view-model:has(comments-entry-point-teaser-view-model), ytm-comments-entry-point-header-renderer",
-          "note": "The comments preview under the video, which opens the comments. The first checked 2026-09-30; the second is an older form."
+          "note": "The comments preview under the video, which opens the comments. The first is checked; the second is an older form."
         }
       ]
     },
@@ -273,7 +273,7 @@
       "hide": [
         {
           "selector": "ytm-button-renderer:has(> a[href^=\"intent:\"]), a[href^=\"intent:\"], a[href^=\"vnd.youtube:\"], a[href*=\"play.google.com/store/apps\"], a[href*=\"apps.apple.com\"]",
-          "note": "The Open App button on the watch page (checked 2026-09-30). The app never opens intent: or vnd.youtube: links whatever this setting is; this only hides them."
+          "note": "The Open App button on the watch page (checked). The app never opens intent: or vnd.youtube: links whatever this setting is; this only hides them."
         },
         {
           "selector": "ytm-mealbar-promo-renderer",
