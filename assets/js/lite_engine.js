@@ -598,9 +598,14 @@ function liteEngine(input, env) {
 
   // Returns true if it hid the element's container.
   function check(element, rule) {
+    // Labels in server-rendered markup can carry far more whitespace than
+    // text (Reddit's 7-letter "For You" tab has 83 characters), so the
+    // limit applies once whitespace is collapsed. The looser check first
+    // skips long text without the work of collapsing it.
     var text = element.textContent;
-    if (!text || text.length > MAX_LABEL_LENGTH) return false;
+    if (!text || text.length > MAX_LABEL_LENGTH * 4) return false;
     text = normalizeText(text);
+    if (text.length > MAX_LABEL_LENGTH) return false;
     if (!rule.labels[text] && !(rule.pattern && rule.pattern.test(text))) return false;
     var container = element.closest(rule.container);
     if (!container || container.hasAttribute(HIDDEN) || container.hasAttribute(COLLAPSED)) return false;

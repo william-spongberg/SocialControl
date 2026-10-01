@@ -314,6 +314,23 @@ describe('text rules', () => {
     assert.equal(page.engine.stats().hideByText[0].matches, 2);
   });
 
+  test('match a short label wrapped in a lot of whitespace, but not long text', () => {
+    // Reddit's "For You" tab: 7 letters among 83 characters of markup.
+    const padded = `\n${' '.repeat(40)}For You\n${' '.repeat(40)}`;
+    const long = 'x'.repeat(100);
+    const page = boot({
+      body: `<button id="tab">${padded}</button><button id="long">${long}</button>`,
+      config: {
+        hideByText: [
+          { id: 'tab', container: 'button', marker: 'button', text: ['For You', long] },
+        ],
+      },
+    });
+    const { window, document } = page;
+    assert.equal(hidden(window, document.getElementById('tab')), true);
+    assert.equal(hidden(window, document.getElementById('long')), false);
+  });
+
   test('catch a label whose text arrives after its element', async () => {
     const page = boot({ body: '<article id="ad"><span id="label"></span></article>', config: { hideByText: [ads] } });
     const { window, document } = page;
