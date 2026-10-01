@@ -181,20 +181,8 @@ class SiteRules {
 
   bool isSiteHost(String host) => hosts.contains(host.toLowerCase());
 
-  bool isAllowedHost(String host) {
-    final normalized = host.toLowerCase();
-    return allowedHosts.contains(normalized) ||
-        _oauthHosts.contains(normalized);
-  }
+  bool isAllowedHost(String host) => allowedHosts.contains(host.toLowerCase());
 }
-
-const _oauthHosts = {
-  'accounts.google.com',
-  'appleid.apple.com',
-  'auth.facebook.com',
-  'm.facebook.com',
-  'www.facebook.com',
-};
 
 /// How to tell whether the user is signed in to a site: any of [cookies] is
 /// set for its start URL.

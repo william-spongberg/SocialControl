@@ -158,9 +158,11 @@ redirects in a row with no tap or key press in between).
 
 ### Navigation and links
 
-- A site's own hosts load in its WebView, along with a few allowed hosts,
-  such as Accounts Center for Instagram and Google's sign-in pages for
-  YouTube.
+- A site's own hosts load in its WebView, along with the hosts its rules
+  allow, such as Accounts Center and Facebook's login for Instagram, and
+  Google's sign-in pages for YouTube and Reddit. A sign-in provider is only
+  allowed for a site that uses it, so a link to Facebook in a Reddit post
+  opens in the browser.
 - A link to another site in the app opens there: a YouTube link in an
   Instagram bio switches to the app's YouTube, not the YouTube app.
 - Every other site opens in the system browser. Outbound-link redirectors

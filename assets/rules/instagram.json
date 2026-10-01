@@ -3,7 +3,7 @@
   "platform": "instagram",
   "revision": 5,
   "updated": "2026-10-01",
-  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. Target hrefs, roles and structure, never generated class names. Notes say where a signal comes from; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). Rules that hide whole feed posts use collapse, because the feed breaks when a post is removed (see docs/RULES.md).",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. \"Log in with Facebook\" needs Facebook's login hosts in allowedHosts. Target hrefs, roles and structure, never generated class names. Notes say where a signal comes from; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). Rules that hide whole feed posts use collapse, because the feed breaks when a post is removed (see docs/RULES.md).",
   "startUrl": "https://www.instagram.com/",
   "hosts": [
     "instagram.com",
@@ -13,7 +13,10 @@
   "allowedHosts": [
     "accountscenter.instagram.com",
     "help.instagram.com",
-    "privacycenter.instagram.com"
+    "privacycenter.instagram.com",
+    "www.facebook.com",
+    "m.facebook.com",
+    "auth.facebook.com"
   ],
   "session": {
     "cookies": ["ds_user_id"]

@@ -111,15 +111,17 @@ void main() {
       expect(decide('mailto:hi@example.com'), isA<NavOpenExternal>());
     });
 
-    test('keeps allowed hosts inside the app', () {
+    test('keeps only the hosts the rules allow inside the app', () {
       expect(decide('https://accountscenter.instagram.com/'), isA<NavAllow>());
-      expect(decide('https://accounts.google.com/'), isA<NavAllow>());
-      expect(decide('https://accounts.google.com.au/'), isA<NavOpenExternal>());
-      expect(
-        decide('https://appleid.apple.com/auth/authorize'),
-        isA<NavAllow>(),
-      );
-      expect(decide('https://www.facebook.com/dialog/oauth'), isA<NavAllow>());
+      // Sign-in providers load in the app only for sites whose rules list
+      // them.
+      for (final url in [
+        'https://accounts.google.com/',
+        'https://appleid.apple.com/auth/authorize',
+        'https://www.facebook.com/dialog/oauth',
+      ]) {
+        expect(decide(url), isA<NavOpenExternal>(), reason: url);
+      }
     });
 
     test('unwraps link shims before deciding', () {

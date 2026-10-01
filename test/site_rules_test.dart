@@ -133,6 +133,27 @@ void main() {
       expect(rules.isSignedIn(const {}), isFalse);
     });
 
+    test('keep Facebook\'s login inside the app', () {
+      final policy = UrlPolicy(rules, resolver);
+      for (final url in [
+        'https://www.facebook.com/login.php?next=x',
+        'https://m.facebook.com/login.php?next=x',
+      ]) {
+        expect(
+          policy.decide(Uri.parse(url), isMainFrame: true),
+          isA<NavAllow>(),
+          reason: url,
+        );
+      }
+      expect(
+        policy.decide(
+          Uri.parse('https://accounts.google.com/'),
+          isMainFrame: true,
+        ),
+        isA<NavOpenExternal>(),
+      );
+    });
+
     test('collapse whole posts instead of removing them', () {
       // Instagram's feed measures each post against the next one, and stops
       // rendering posts when one is removed. See HideRule.collapse.
@@ -390,6 +411,29 @@ void main() {
           isMainFrame: true,
         ),
         isA<NavAllow>(),
+      );
+    });
+
+    test('keep Google\'s and Apple\'s sign-in inside the app', () {
+      final policy = UrlPolicy(rules, resolver);
+      for (final url in [
+        // The popup "Continue with Google" opens.
+        'https://accounts.google.com/v3/signin/identifier?display=popup',
+        'https://appleid.apple.com/auth/authorize?client_id=x',
+      ]) {
+        expect(
+          policy.decide(Uri.parse(url), isMainFrame: true, signedIn: false),
+          isA<NavAllow>(),
+          reason: url,
+        );
+      }
+      // Other sites in posts open in the browser.
+      expect(
+        policy.decide(
+          Uri.parse('https://www.facebook.com/somepage'),
+          isMainFrame: true,
+        ),
+        isA<NavOpenExternal>(),
       );
     });
 

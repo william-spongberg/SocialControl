@@ -3,7 +3,7 @@
   "platform": "reddit",
   "revision": 4,
   "updated": "2026-10-01",
-  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. Public Reddit mobile web needs no sign-in, but normal Reddit sign-in remains available. App-promotion hooks were checked on mobile web; other selectors are unverified against future site changes.",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. Public Reddit mobile web needs no sign-in, but normal Reddit sign-in remains available. App-promotion hooks were checked on mobile web; other selectors are unverified against future site changes. allowedHosts lists Google's and Apple's sign-in hosts: \"Continue with Google\" signs you in to Google in a popup window, and every step of that must stay in the app.",
   "startUrl": "https://www.reddit.com/",
   "hosts": [
     "reddit.com",
@@ -14,7 +14,13 @@
   "allowedHosts": [
     "www.redditstatic.com",
     "www.redditmedia.com",
-    "preview.redd.it"
+    "preview.redd.it",
+    "accounts.google.com",
+    "accounts.youtube.com",
+    "myaccount.google.com",
+    "gds.google.com",
+    "consent.google.com",
+    "appleid.apple.com"
   ],
   "linkShims": [],
   "userAgent": "browser",
