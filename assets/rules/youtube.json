@@ -112,7 +112,7 @@
         },
         {
           "selector": "ytm-rich-section-renderer:has(ytm-reel-shelf-renderer, ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2)",
-          "note": "The feed section around a Shorts shelf, so no gap is left. unverified"
+          "note": "The feed section around a Shorts shelf, so no gap is left (checked signed in, in Subscriptions)."
         },
         {
           "selector": "ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2, ytm-reel-item-renderer",
@@ -120,7 +120,7 @@
         },
         {
           "selector": ":is(ytm-video-with-context-renderer, ytm-rich-item-renderer, ytm-compact-video-renderer):has(a[href^=\"/shorts/\"])",
-          "note": "A Short shown as an ordinary video row, e.g. in Subscriptions. unverified"
+          "note": "A Short shown as an ordinary video row, such as in search results (checked signed in)."
         },
         {
           "selector": "yt-tab-shape[tab-title=\"Shorts\"]",
