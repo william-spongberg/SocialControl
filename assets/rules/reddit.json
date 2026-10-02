@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "platform": "reddit",
-  "revision": 5,
-  "updated": "2026-10-01",
+  "revision": 6,
+  "updated": "2026-10-02",
   "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. You must sign in to use Reddit in the app. App-promotion hooks were checked on mobile web; other selectors are unverified against future site changes. allowedHosts lists Google's and Apple's sign-in hosts: \"Continue with Google\" signs you in to Google in a popup window, and every step of that must stay in the app, including the hop to your country's Google domain. For now the app assumes Australia, so only accounts.google.com.au is listed.",
   "startUrl": "https://www.reddit.com/",
   "hosts": [
@@ -91,6 +91,10 @@
         {
           "selector": "left-nav-top-section",
           "note": "The top of the side menu: Home, Popular, News, Explore and Chat. Its links are in shadow DOM, which page CSS can't reach, so the whole section goes; the Reddit logo still goes Home, and Chat would open in the browser (checked signed in)."
+        },
+        {
+          "selector": "faceplate-expandable-section-helper:has(summary[aria-controls=\"games_section\"])",
+          "note": "\"Games on Reddit\" at the top of the side menu: games Reddit picks for you, and Discover More (checked signed in)."
         }
       ]
     },
