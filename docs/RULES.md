@@ -223,66 +223,59 @@ This checks rules and everything the engine does. The app's own part,
 which links load where (`UrlPolicy`), can be checked by running it in
 plain Dart over the URLs the browser visited; Firefox's history has every
 step of a sign-in. TikTok asks a driven browser to drag a slider to solve
-a puzzle now and then, and quietly drops follows it makes.
+a puzzle now and then, quietly drops follows it makes (the follow
+request comes back empty), and after a lot of browsing refuses to list
+a profile's videos (HTTP 429).
 
 The Flutter web build can't do this: it shows each site in a frame, which
 all four sites refuse (`X-Frame-Options`), and it can't inject the engine
 into another site's frame.
 
-### Instagram checklist (revision 5)
+### Instagram checklist (revision 6)
 
-Checked signed in on a computer (see above): Home opens the Following
-feed and keeps loading posts as you scroll, with posts on screen
-throughout; the Reels tab and links are hidden and `/reels/` goes Home;
-Explore opens search at `/explore/search/` with no grid; the inbox lists
-your conversations. Still to check on a device:
+Checked on a computer (see above). Signed out, Instagram and a profile
+someone links to open on the login page, and Forgot password and Create
+new account work. Signed in, Home opens `/?variant=following`, also from
+`/?deoia=1` and from other feeds such as `/?variant=home`, and shows only
+accounts you follow, with no stories; scrolling far down fast keeps posts
+on screen. The Reels tab is gone with no gap in the tab bar, `/reels/`
+goes Home with "Reels blocked", and `/reels/<code>/` opens that reel on
+its own. Home and Explore change page without reloading; Explore opens
+search at `/explore/search/` with no grid, and searching for a person
+opens their profile. A hashtag is blocked. The inbox has the tab bar
+below its last conversation, its tabs work, and a conversation has none.
+Paid partnerships are hidden; ads (labelled "Ad") and suggested posts and
+accounts appear in the algorithmic feed only, where the rules' signals
+match them. A post from an account you don't follow opens, links in a
+bio open in the browser (a YouTube link in the app's YouTube), and no
+"Use the app" bar or other app prompt shows. Still to check on a device:
 
-Signed out, check:
-
-- [ ] Instagram opens on its login page, and so does any other Instagram
-      page, such as a profile someone links to. Sign up and Forgot
-      password still work.
-
-Log in with a username and password, then check:
-
-- [ ] Home opens `/?variant=following` and shows only accounts you follow,
-      also right after logging in.
-- [ ] Scrolling far down Home, fast, keeps showing posts: no blank screen,
-      and no jumping back.
-- [ ] The Reels tab is gone, and the tab bar has no gap.
-- [ ] Visiting `/reels/` goes to Home and shows "Reels blocked".
-- [ ] A reel someone sends you in messages opens, and so does a
-      `/reels/<code>/` link, as that reel on its own (`/reel/<code>/`).
-- [ ] Tapping Home or Explore changes page without reloading it.
-- [ ] The inbox has the tab bar at the bottom, and its tabs work. A
-      conversation doesn't.
-- [ ] The Explore tab opens search at `/explore/search/`: a search box and no
-      grid. Searching for a person and opening their profile works.
-- [ ] A hashtag page (`/explore/tags/...`) is blocked.
-- [ ] Stories are absent from the Following feed.
-- [ ] No ads in the feed or between stories. When an ad would have appeared,
-      Rule diagnostics shows a match for one of the `hideSponsored` rules.
-- [ ] No "Suggested for you" posts or account boxes, on Home or on profiles.
-- [ ] A post someone sends you from an account you don't follow still opens.
+- [ ] Scrolling far down Home, fast, keeps showing posts with no jumping
+      back. (Desktop Firefox jumps back now and then with or without the
+      filters, so only a device shows this.)
+- [ ] A reel someone sends you in messages opens on its own.
+- [ ] No ads between stories. When an ad would have appeared, Rule
+      diagnostics shows a match for one of the `hideSponsored` rules.
 - [ ] Posting works: new post → pick a photo → share. Also with the
       camera: new post → Camera → take a photo, and it opens in
       Instagram's editor (needs a full rebuild).
-- [ ] A link in someone's bio opens in the browser.
-- [ ] No "Open in app" prompts.
 
-If `/explore/search/` isn't a real page on mobile web, change the
-`hideExplore` redirect to go to a search page that exists.
+### YouTube checklist (revision 5)
 
-### YouTube checklist (revision 4)
-
-Checked logged out in headless Firefox: the Home and Shorts tabs, Shorts in
-search and on channels, related videos, comments, the
-Open App button, and the Home, Shorts, channel Shorts and Trending routes.
-Checked signed in on a computer: Subscriptions loads with no Shorts; the
-bottom bar has only Subscriptions and You, also when YouTube draws its
-fallback bar (Home, Shorts, Library); search works; a Short opens as a
-normal video; a watch page loses its autoplay, end screen and ad data.
-Still to check on a device:
+Checked on a computer. Signed out, YouTube and a video someone links to
+open on the You page ("You're not signed in", with a Sign in button).
+Signed in, it opens on Subscriptions, and the YouTube logo goes there
+without reloading the page; the bottom bar has only Subscriptions and
+You, also when YouTube draws its fallback bar. Subscriptions shows no
+Shorts, as shelves or single videos, and a Short opens as a normal
+video. A video shows its title, description and comments with no
+recommendations, and when it ends there's no grid of suggestions or "Up
+next" countdown, and nothing else starts. Its ad data is removed (Rule
+diagnostics shows the `hideAds` prune rules matching). Search works,
+with no Shorts and no ads (YouTube showed this account none), links in a
+description open in the browser, and in fullscreen there's no "More
+videos" button. In a playlist, Next plays its next video. Still to
+check on a device:
 
 - [x] Signing in works: Google accepted the password and 2-Step
   Verification in the app, and YouTube was signed in.
@@ -290,97 +283,79 @@ Still to check on a device:
       the browser instead, find its host (`adb logcat -d | grep
       'act=android.intent.action.VIEW'` shows it) and add it to
       `allowedHosts`.
-- [ ] Signed out, YouTube opens on the You page ("You're not signed in",
-      with a Sign in button), and so does every other page, such as a
-      video someone links to.
-- [ ] Signed in, it opens on Subscriptions, and so does tapping the YouTube
-      logo. Signing out from YouTube's own menu lands on the You page. If
+- [ ] Signing out from YouTube's own menu lands on the You page. If
       signed in still sends you to the You page, the `session` cookies are
       wrong: check which cookies m.youtube.com has in the inspector's
       Application panel.
-- [ ] The bottom bar has no Home or Shorts tab, and Subscriptions and You
-      still work.
-- [ ] No Shorts in the Subscriptions feed, whether as a shelf or as single
-      videos. If some show, inspect them and extend the `hideShorts` rules.
-- [ ] A Short someone sends you opens as a normal video.
-- [ ] Watching a video shows its title, description and comments, but no
-      recommendations underneath.
-- [ ] When a video ends, no grid of suggestions or "Up next" countdown, and
-      the next video doesn't start.
-- [ ] No ads before or during videos. When one would have played, Rule
-      diagnostics shows a match for one of the `hideAds` prune rules.
-- [ ] No ads in search results or under the video.
+- [ ] No ads before or during videos.
 - [ ] Fullscreen turns the phone to landscape (a portrait video stays
       portrait), and leaving it turns back and puts the video back above
       its title (see "Fullscreen video" in DESIGN.md).
-- [ ] Playlists and Watch later play in order.
-- [ ] A link in a video description opens in the browser.
-- [ ] A YouTube link in Instagram (a bio, a message) opens in the app's
-      YouTube, not the YouTube app.
+- [ ] Playlists and Watch later play in order, moving on to the next
+      video when one ends.
 - [ ] Switching to Instagram pauses a playing video.
 
-### Reddit checklist (revision 5)
+### Reddit checklist (revision 6)
 
-Checked signed in on a computer: signing in with "Continue with Google"
-passed only through allowed hosts; a signed-in `token_v2` has `sub` set to
-`user`, so the session check holds; Home opens on Following
-(`/?feed=following`) with no For You tab; Popular, All, News and Explore
-are blocked, and the side menu doesn't list them; a subreddit and a post
-open; promoted posts are hidden in feeds and between
-comments; the "View in Reddit App" sheet is hidden, and the page still
-scrolls and takes taps. Still to check on a device:
+Checked on a computer. Signed out, Reddit and a subreddit someone links
+to open on the login page, and Sign Up and Forgot password open their
+forms. Signing in with "Continue with Google" passed only through
+allowed hosts, and a signed-in `token_v2` has `sub` set to `user`, so the
+session check holds. Home opens on Following (`/?feed=following`) with
+posts from your communities and no For You tab; Popular, All, News and
+Explore are blocked, and the side menu lists none of them, nor "Games on
+Reddit"; a subreddit and a post open. Promoted posts are hidden in feeds
+and between comments, and recommended posts in feeds. The "View in
+Reddit App" sheet is hidden, and the page still scrolls and takes taps.
+Links in posts go to the browser (a YouTube link to the app's YouTube).
+Still to check on a device:
 
-- [ ] Signed out, Reddit opens on its login page, and so does any other
-      Reddit page. Sign up and Forgot password still work.
 - [ ] "Continue with Google" opens Google's sign-in over Reddit. Signing
       in there closes it and signs you in to Reddit. If a step opens the
       browser instead, add its host to `allowedHosts`, as for YouTube.
-- [ ] Signed in, Reddit stays signed in, across pages and after
-      restarting the app. If it sends you to the login page while you're
-      signed in, the `session` check is wrong: in the inspector's
-      Application panel, decode the middle part of the `token_v2`
-      cookie's value (base64) and fix `anonymousTokens` to match.
-- [ ] Home shows posts from communities you've joined, with no For You
-      tab.
+- [ ] Signed in, Reddit stays signed in after restarting the app. If it
+      sends you to the login page while you're signed in, the `session`
+      check is wrong: in the inspector's Application panel, decode the
+      middle part of the `token_v2` cookie's value (base64) and fix
+      `anonymousTokens` to match.
 - [ ] A link in a post opens in the browser, with no window left over
       Reddit.
 - [x] The top-right `Open App` button is hidden.
 - [x] The "Get the best of Reddit in the app" bottom sheet is hidden.
-- [ ] The "View in Reddit App" sheet never shows, and the page scrolls.
-- [ ] Popular, All, News and Explore are blocked, and the side menu
-      doesn't list them, while a subreddit and direct post open.
-- [ ] Promoted and recommended posts are absent from feeds, and ads from
-      between comments.
 
-### TikTok checklist (revision 1)
+### TikTok checklist (revision 2)
 
-Checked signed in on a computer: signing in with "Continue with Google"
-passed only through allowed hosts; `sessionid` and `sid_tt` appear once
-you sign in; Home opens Following, with no For You tab at the top or in
-the side menu and no Discover tab; a shared video plays on its own and
-swiping goes nowhere; search pages show matching accounts, and the
-search box's app link becomes an account search (in plain Dart); hashtags,
-sounds and LIVE are blocked; comments open; profiles show their videos;
-the inbox shows notifications; no open-the-app buttons or pop-ups. Still
-to check on a device:
+Checked on a computer. Signed out, TikTok and a profile someone links to
+open on the login page, and "Use phone / email / username" and Sign up
+work. Signing in with "Continue with Google" passed only through allowed
+hosts, and `sessionid` and `sid_tt` appear once you sign in. Home opens
+Following, with no For You tab at the top or in the side menu and no
+Discover tab; a shared video plays on its own and swiping goes nowhere.
+Search shows your recent searches and suggestions as you type, and
+Enter, a suggestion or the Search button shows matching accounts (the
+app's part, closing the window TikTok opens for its app, was checked
+against the app's policy in plain Dart). For You, a hashtag, a sound,
+LIVE and Discover show "For You blocked", "Hashtag feeds blocked",
+"Sound feeds blocked", "LIVE blocked" and "Discover blocked". Comments
+open, the inbox shows notifications, and no open-the-app buttons,
+pop-ups or the dark backdrop of a hidden one show. Still to check on a
+device:
 
-- [ ] Signed out, TikTok opens on its login page, and so does any other
-      TikTok page. "Use phone / email / username" and Sign up work.
 - [ ] "Continue with Google" opens Google's sign-in over TikTok, and
       signing in there closes it and signs you in to TikTok.
-- [ ] Following shows videos from accounts you follow, and they play.
-      (Not checked anywhere yet: TikTok dropped follows made from the
-      test browser.)
+- [ ] Following an account sticks, and Following then shows its videos,
+      which play. (From the computer, TikTok accepts the follow request
+      but drops it: its answer is empty, and the account isn't followed
+      after a reload.)
 - [ ] A TikTok share link (`vm.tiktok.com/...`) in another site opens in
       the app's TikTok, plays on its own, and swiping up shows nothing
       more.
-- [ ] Typing a name in search and tapping Search shows matching
-      accounts, and never opens the TikTok app or the Play Store.
-- [ ] `/foryou`, a hashtag and LIVE show "For You blocked", "Hashtag
-      feeds blocked" and "LIVE blocked".
-- [ ] No "Open app" buttons, "Get the full app experience" pop-ups or
-      ads. When an ad would have appeared, Rule diagnostics shows a match
-      for `hideAds/prune0`.
+- [ ] Typing a name in search and pressing Enter, or tapping a
+      suggestion or Search, shows matching accounts, and never opens the
+      TikTok app, the Play Store or a window over TikTok (needs a full
+      rebuild).
+- [ ] No ads. When an ad would have appeared, Rule diagnostics shows a
+      match for `hideAds/prune0`.
 - [ ] If TikTok asks you to drag a slider to fit a puzzle, solving it
       works in the app.
 
