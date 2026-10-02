@@ -34,7 +34,7 @@
         "value": "loid"
       }
     ],
-    "note": "Both are HttpOnly, so only the app can read them. reddit_session is only set for some signed-in sessions. Reddit sets token_v2, a JSON Web Token, for every visitor: its sub claim is loid while you're signed out and user once you sign in (per https://github.com/public-clis/rdt-cli/issues/9; unverified)."
+    "note": "Both are HttpOnly, so only the app can read them. reddit_session is only set for some signed-in sessions. Reddit sets token_v2, a JSON Web Token, for every visitor: its sub claim is loid while you're signed out and user once you sign in (checked signed in)."
   },
   "signIn": {
     "match": "^/(?!(?:login|register|password)(?:[/?]|$))",
