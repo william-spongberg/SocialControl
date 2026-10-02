@@ -139,6 +139,10 @@
           "note": "The recommendations under the player; the comments section is separate. Checked."
         },
         {
+          "selector": "ytm-fullscreen-related-videos-entry-point-view-model, .ytFullscreenVideoRecommendationsHost",
+          "note": "In fullscreen, the \"More videos\" button at the bottom right, with a suggested video's picture, and the suggestions it opens over the video. They only exist while the player is fullscreen (checked signed in)."
+        },
+        {
           "selector": "ytm-search ytm-shelf-renderer",
           "note": "Shelves such as \"People also watched\" between search results. unverified"
         }
