@@ -218,6 +218,15 @@
           "note": "TikTok's open-the-app component, around every button that opens the app: in the bottom bar, at the top of the feed, in pop-ups and at the end of a profile (checked). Not on search pages, where it also wraps the Search button, your recent searches and the suggestions as you type, which hand the search to the app; the app turns that into account search (checked)."
         },
         {
+          "selector": "div:has(> div.matrix-smart-wrapper):not(:has(> :not(div.matrix-smart-wrapper)))",
+          "paths": "^/(?!search(?:[/?]|$))",
+          "note": "The box around buttons that only open the app, such as the red \"Open on TikTok\" button floating over a profile, which would otherwise stay as an empty pill (checked)."
+        },
+        {
+          "selector": "div:has(> div.app-launch-dialog-polyfill)",
+          "note": "The \"Open TikTok\" sheet that slides up over a page, with the dark mask behind it, which would otherwise stay over the page and take the first tap (checked)."
+        },
+        {
           "selector": "div:has(> div[data-e2e=\"open-titok-icon\"])",
           "note": "The middle button in the bottom bar, which opens the app, with its wrapper, so the bar has no gap (checked)."
         },
