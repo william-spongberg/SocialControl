@@ -207,10 +207,11 @@ redirects in a row with no tap or key press in between).
   would otherwise leave spinning.
 - When the engine redirects, it clicks a link to the target if the page has
   one, so the site's router navigates without a reload. Otherwise, for a
-  site whose rules set `popstateNavigation` (Instagram), it pushes the URL
-  and fires a popstate event, which that router renders just the same for the
-  feed, search and the inbox. Other sites (YouTube)
-  get a full page load.
+  site whose rules set `popstateNavigation` (Instagram and YouTube), it
+  pushes the URL and fires a popstate event, which that router renders just
+  the same: Instagram's feed, search and inbox, and YouTube's Subscriptions,
+  videos and channels. Other sites (Reddit and TikTok) get a full page
+  load.
 - In the inbox, Instagram's mobile site removes its tab bar. A `keep` rule
   has the engine remember the fixed bar from the page before and show a
   copy of it there; the site's styles still apply to the copy, and the

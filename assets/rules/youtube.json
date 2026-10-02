@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "platform": "youtube",
-  "revision": 4,
-  "updated": "2026-10-01",
-  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. m.youtube.com renders custom elements (ytm-*, *-view-model) whose names are stable across builds, unlike its class names. 'checked' means the selector or path was seen on logged-out mobile web; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). You must sign in to use YouTube in the app. After you sign in, Google sets its cookies on your country's domain too on the way back to YouTube, and that hop must stay in the app. For now the app assumes Australia, so allowedHosts lists only accounts.google.com.au; another country's domain would open in the browser. Exact hosts rather than a pattern, so no lookalike domain can load where the app shows no address bar.",
+  "revision": 5,
+  "updated": "2026-10-02",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. m.youtube.com renders custom elements (ytm-*, *-view-model) whose names are stable across builds, unlike its class names. 'checked' means the selector or path was seen on logged-out mobile web; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). You must sign in to use YouTube in the app. After you sign in, Google sets its cookies on your country's domain too on the way back to YouTube, and that hop must stay in the app. For now the app assumes Australia, so allowedHosts lists only accounts.google.com.au; another country's domain would open in the browser. Exact hosts rather than a pattern, so no lookalike domain can load where the app shows no address bar. YouTube's router renders the URL it finds on a popstate event, as Instagram's does, so the engine redirects inside the page, such as from the YouTube logo to Subscriptions, where its tabs aren't links to click (checked signed in).",
   "startUrl": "https://m.youtube.com/",
   "hosts": [
     "youtube.com",
@@ -38,6 +38,7 @@
     }
   ],
   "userAgent": "browser",
+  "popstateNavigation": true,
   "session": {
     "cookies": [
       "SAPISID",
