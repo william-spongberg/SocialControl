@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "platform": "instagram",
-  "revision": 5,
-  "updated": "2026-10-01",
+  "revision": 6,
+  "updated": "2026-10-02",
   "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. You must sign in to use Instagram in the app; \"Log in with Facebook\" needs Facebook's login hosts in allowedHosts. Target hrefs, roles and structure, never generated class names. Notes say where a signal comes from; 'unverified' marks rules not yet checked against a logged-in session (see docs/RULES.md). Rules that hide whole feed posts use collapse, because the feed breaks when a post is removed (see docs/RULES.md).",
   "startUrl": "https://www.instagram.com/",
   "hosts": [
@@ -64,8 +64,8 @@
           "note": "The Reels tab and any link into the Reels feed."
         },
         {
-          "selector": "div:has(> a[href=\"/reels/\"]):not(:has(> :not(a[href=\"/reels/\"])))",
-          "note": "Wrapper the hidden tab leaves behind, so the tab bar has no gap. Only matches a div whose children are all the Reels link. unverified"
+          "selector": "div:has(a[href=\"/reels/\"]):not(:has(a:not([href=\"/reels/\"])))",
+          "note": "The tab's slot in the tab bar, which spaces its tabs evenly, so the bar has no gap where Reels was. Matches the divs around the Reels link that hold no other link (checked signed in)."
         }
       ]
     },

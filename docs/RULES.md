@@ -167,8 +167,8 @@ best. In order of preference:
 
 1. **hrefs**: `a[href^="/reels/"]`. URL structure changes least.
 2. **Roles and structure**: `article`, `[role="dialog"]`, `:has()`.
-   For example, `div:has(> a[href="/reels/"]):not(:has(> :not(a[href="/reels/"])))`
-   matches a wrapper whose only children are the Reels link.
+   For example, `div:has(a[href="/reels/"]):not(:has(a:not([href="/reels/"])))`
+   matches the wrappers around the Reels link that hold no other link.
 3. **Text**, via `hideByText`, when nothing else identifies the element.
 4. **Data**, via `prune`, for things injected from API responses (story ads).
 
