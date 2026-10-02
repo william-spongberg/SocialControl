@@ -153,15 +153,17 @@
       "prune": [
         {
           "path": "contents.singleColumnWatchNextResults.autoplay",
-          "note": "The next video that autoplay would play. Path checked; the effect on playback is unverified."
+          "paths": "^(?!/watch\\?(?:[^#]*&)?list=)",
+          "note": "The recommended video that autoplay would play next (checked: a video ends without moving on). Not in a playlist, where this holds the playlist's next and previous videos, which its Next and Previous buttons and playing in order need (checked)."
         },
         {
           "path": "playerOverlays.playerOverlayRenderer.autoplay",
-          "note": "The \"Up next\" countdown at the end of a video. Path checked; effect unverified."
+          "paths": "^(?!/watch\\?(?:[^#]*&)?list=)",
+          "note": "The \"Up next\" countdown at the end of a video (checked). Not in a playlist, as above."
         },
         {
           "path": "playerOverlays.playerOverlayRenderer.endScreen",
-          "note": "The grid of suggested videos at the end of a video. Path checked; effect unverified."
+          "note": "The grid of suggested videos at the end of a video (checked)."
         }
       ]
     },
