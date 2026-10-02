@@ -225,6 +225,14 @@
           "paths": "^/direct/inbox/?(?:\\?.*)?$",
           "note": "Instagram's mobile site removes its tab bar, a fixed box of links, when you open messages (checked). Only the inbox: a conversation has the message box at the bottom."
         }
+      ],
+      "style": [
+        {
+          "selector": "[data-pagelet=\"IGDInboxThreadListScrollableAreaPagelet\"]",
+          "css": "padding-bottom: 50px",
+          "paths": "^/direct/inbox/?(?:\\?.*)?$",
+          "note": "Room for the kept tab bar under your conversations, which otherwise scroll on behind it, so it covered the last one. The list is the last part of this box, and shrinks to make room (checked signed in)."
+        }
       ]
     },
     {
