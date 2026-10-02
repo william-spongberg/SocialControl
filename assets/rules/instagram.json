@@ -236,6 +236,16 @@
           "selector": "a[href*=\"play.google.com/store/apps\"], a[href*=\"apps.apple.com\"], a[href*=\"itunes.apple.com\"], a[href^=\"intent:\"], a[href^=\"instagram:\"]",
           "note": "The app never opens intent: or instagram: links whatever this setting is; this only hides them."
         }
+      ],
+      "hideByText": [
+        {
+          "container": "div[data-visualcompletion=\"ignore\"]",
+          "marker": "button",
+          "text": [
+            "Use the app"
+          ],
+          "note": "The \"Use the app\" bar above the tab bar on a post's page, a button with no link to hide it by, with its close button (checked signed in)."
+        }
       ]
     }
   ]
