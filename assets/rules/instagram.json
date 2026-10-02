@@ -49,7 +49,7 @@
           "match": "^/reels/([A-Za-z0-9_-]+)",
           "action": "redirect",
           "to": "/reel/$1/",
-          "note": "A link into the Reels feed at one reel (/reels/<code>/) opens that reel's own page instead. unverified"
+          "note": "A link into the Reels feed at one reel (/reels/<code>/) opens that reel's own page instead (checked signed in)."
         },
         {
           "match": "^/reels(?:[/?]|$)",
@@ -79,7 +79,7 @@
           "match": "^/explore/?(?:\\?.*)?$",
           "action": "redirect",
           "to": "/explore/search/",
-          "note": "Assumes mobile web serves the search page at /explore/search/. unverified"
+          "note": "Mobile web serves its search page, a search box with no grid, at /explore/search/ (checked signed in)."
         },
         {
           "match": "^/explore/(?:tags|locations|people)/",
@@ -126,7 +126,7 @@
             "Suggested reels",
             "Suggested threads"
           ],
-          "note": "The label on suggested posts. unverified"
+          "note": "The label on suggested posts (checked signed in, in the algorithmic feed)."
         },
         {
           "container": "article",
@@ -136,17 +136,17 @@
             "Follow"
           ],
           "paths": "^/(?:\\?.*)?$",
-          "note": "In the home feed, a post with a Follow button is from an account you don't follow: a suggestion or an ad. Home feed only, so posts people send you still show. unverified"
+          "note": "In the home feed, a post with a Follow button is from an account you don't follow, such as a suggestion (checked signed in, in the algorithmic feed). Home feed only, so posts people send you still show."
         }
       ],
       "prune": [
         {
           "path": "data.xdt_api__v1__feed__timeline__connection.edges.[-].node.suggested_users",
-          "note": "\"Suggested for you\" account boxes, removed from the feed data before they render. Slot names seen in the feed data, like the rules below; none was filled in 40 Following-feed items. unverified"
+          "note": "\"Suggested for you\" account boxes, removed from the feed data before they render: edges whose suggested_users slot is filled (checked signed in, in the algorithmic feed; the Following feed has none)."
         },
         {
           "path": "data.xdt_api__v1__feed__timeline__connection.edges.[-].node.explore_story",
-          "note": "Suggested posts from Explore, such as those after \"You're all caught up\". unverified"
+          "note": "Suggested posts from Explore, such as those after \"You're all caught up\": edges whose explore_story slot is filled (checked signed in, in the algorithmic feed)."
         },
         {
           "path": "data.xdt_api__v1__feed__timeline__connection.edges.[-].node.bloks_netego",
@@ -206,7 +206,7 @@
         },
         {
           "path": "data.xdt_api__v1__feed__timeline__connection.edges.[-].node.ad",
-          "note": "Feed items are slots (media, ad, suggested_users, ...) with the unused ones null; this drops the items that carry an ad. Slot names seen in the feed data; no ad was filled in 40 Following-feed items. unverified"
+          "note": "Feed items are slots (media, ad, suggested_users, explore_story, ...) with the unused ones null; this drops the items that carry an ad (checked signed in: ads fill it in the algorithmic feed; the Following feed has none)."
         },
         {
           "path": "data.xdt_api__v1__feed__timeline__connection.edges.[-].node.ad4ad_in_webfeed",
