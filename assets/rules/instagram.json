@@ -180,10 +180,11 @@
           "marker": "span",
           "collapse": true,
           "text": [
+            "Ad",
             "Sponsored"
           ],
           "pattern": "^(?:Paid partnership)(?: .+)?$",
-          "note": "The label under the account name on ads and paid partnerships (\"Paid partnership with ...\")."
+          "note": "The label under the account name on ads (\"Ad\", seen signed in, or \"Sponsored\") and paid partnerships (\"Paid partnership with ...\")."
         }
       ],
       "hide": [
