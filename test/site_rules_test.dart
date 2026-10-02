@@ -719,6 +719,48 @@ void main() {
       }
     });
 
+    test('search from Enter, and from TikTok\'s Search button and suggestions', () {
+      // Enter in the search box finds accounts.
+      final box = rules.searchBoxes.single;
+      expect(box.to, r'/search/user?q=$1');
+      final boxPages = RegExp(box.paths!);
+      expect(boxPages.hasMatch('/search'), isTrue);
+      expect(boxPages.hasMatch('/search?q=cats'), isTrue);
+      expect(boxPages.hasMatch('/following'), isFalse);
+      // The Search button, recent searches and suggestions are inside
+      // TikTok's open-the-app wrapper, which stays on search pages.
+      final wrapper = rules.features
+          .firstWhere((f) => f.id == 'hideAppPrompts')
+          .hide
+          .firstWhere((h) => h.selector == 'div.matrix-smart-wrapper');
+      final wrapperPages = RegExp(wrapper.paths!);
+      for (final path in ['/search', '/search?q=cats', '/search/user?q=x']) {
+        expect(wrapperPages.hasMatch(path), isFalse, reason: path);
+      }
+      for (final path in ['/following', '/@afl', '/inbox', '/searchlight']) {
+        expect(wrapperPages.hasMatch(path), isTrue, reason: path);
+      }
+      // They hand the search to the TikTok app in a window they open, which
+      // the app closes, opening the account search in the site instead.
+      for (final url in [
+        'https://snssdk1233.onelink.me/bIdt?af_dp=snssdk1233%3A%2F%2Fsearch%3Fkeyword%3Dhawthorn%2520vs%2520geelong',
+        'https://app-va.tiktokv.com/redirect/?redirect_url=snssdk1233%3A%2F%2Fsearch%3Fkeyword%3Dhawthorn',
+      ]) {
+        final uri = Uri.parse(url);
+        expect(
+          policy.handsOff(uri, policy.decide(uri, isMainFrame: true)),
+          isTrue,
+          reason: url,
+        );
+      }
+      expect(
+        decided(
+          'https://snssdk1233.onelink.me/bIdt?af_dp=snssdk1233%3A%2F%2Fsearch%3Fkeyword%3Dhawthorn%2520vs%2520geelong',
+        ),
+        'https://www.tiktok.com/search/user?q=hawthorn%20vs%20geelong',
+      );
+    });
+
     test('never open the TikTok app', () {
       for (final url in [
         'https://app-va.tiktokv.com/redirect/?redirect_url=snssdk1233%3A%2F%2Fuser%2Fprofile%2F1',

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "platform": "tiktok",
-  "revision": 1,
-  "updated": "2026-10-01",
-  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. TikTok's mobile site marks its elements with data-e2e attributes for its own tests, which outlast its generated class names, so rules target those. 'checked' means seen in a signed-in session in a browser with the engine injected; 'unverified' marks rules not yet seen working (see docs/RULES.md). You must sign in to use TikTok in the app. Continue with Google, Facebook and Apple each sign you in in a popup window, so allowedHosts lists their sign-in hosts; for now the app assumes Australia, so the only Google country domain listed is accounts.google.com.au. vm.tiktok.com and vt.tiktok.com are TikTok's share links, which redirect to www.tiktok.com. TikTok's mobile site can only search accounts (at /search/user?q=); its search box hands the search to the TikTok app, through app-va.tiktokv.com and snssdk1233.onelink.me. linkShims unwrap those to the app link inside, which appLinks sends to account search.",
+  "revision": 2,
+  "updated": "2026-10-02",
+  "notes": "Data only: URL patterns, CSS selectors, text labels and JSON paths. TikTok's mobile site marks its elements with data-e2e attributes for its own tests, which outlast its generated class names, so rules target those. 'checked' means seen in a signed-in session in a browser with the engine injected; 'unverified' marks rules not yet seen working (see docs/RULES.md). You must sign in to use TikTok in the app. Continue with Google, Facebook and Apple each sign you in in a popup window, so allowedHosts lists their sign-in hosts; for now the app assumes Australia, so the only Google country domain listed is accounts.google.com.au. vm.tiktok.com and vt.tiktok.com are TikTok's share links, which redirect to www.tiktok.com. TikTok's mobile site can only search accounts (at /search/user?q=); its search box hands the search to the TikTok app, through app-va.tiktokv.com and snssdk1233.onelink.me. linkShims unwrap those to the app link inside, which appLinks sends to account search. Enter does nothing in that search box, so searchBoxes makes it go to account search too.",
   "startUrl": "https://www.tiktok.com/",
   "hosts": [
     "tiktok.com",
@@ -43,6 +43,14 @@
       "match": "^snssdk1233://search\\?(?:[^#]*&)?keyword=([^&#]+)",
       "to": "/search/user?q=$1",
       "note": "A search from TikTok's search box (or a recent or suggested search) finds accounts, the only search its mobile site has (checked). Other app links are dropped."
+    }
+  ],
+  "searchBoxes": [
+    {
+      "input": "input[placeholder]",
+      "paths": "^/search(?:[/?]|$)",
+      "to": "/search/user?q=$1",
+      "note": "The search box at the top of the search page, its only text box with a placeholder. TikTok doesn't search when you press Enter there, only from its Search button and suggestions, which hand the search to the TikTok app (checked)."
     }
   ],
   "userAgent": "browser",
@@ -206,7 +214,8 @@
       "hide": [
         {
           "selector": "div.matrix-smart-wrapper",
-          "note": "TikTok's open-the-app component, around every button that opens the app: in the bottom bar, at the top of the feed, in pop-ups and at the end of a profile (checked)."
+          "paths": "^/(?!search(?:[/?]|$))",
+          "note": "TikTok's open-the-app component, around every button that opens the app: in the bottom bar, at the top of the feed, in pop-ups and at the end of a profile (checked). Not on search pages, where it also wraps the Search button, your recent searches and the suggestions as you type, which hand the search to the app; the app turns that into account search (checked)."
         },
         {
           "selector": "div:has(> div[data-e2e=\"open-titok-icon\"])",

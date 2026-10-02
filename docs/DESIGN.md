@@ -221,7 +221,8 @@ redirects in a row with no tap or key press in between).
   instead. TikTok's mobile site can't search videos, and its search box
   hands every search to the TikTok app (`snssdk1233://search?keyword=...`),
   so the app shows the matching accounts (`/search/user?q=...`), the one
-  search the mobile site has.
+  search the mobile site has. The search box does nothing when you press
+  Enter, so the rules' `searchBoxes` have the engine go to that page too.
 
 ### Fullscreen video
 
