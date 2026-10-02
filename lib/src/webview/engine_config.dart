@@ -104,6 +104,11 @@ class EngineConfig {
       'hideByText': hideByText,
       'prune': prune,
       'keep': keep,
+      // Not a filter: without it the site's search doesn't work.
+      'searchBoxes': [
+        for (final (i, s) in rules.searchBoxes.indexed)
+          {'id': 'searchBox$i', 'input': s.input, 'to': s.to, 'paths': s.paths},
+      ],
     });
   }
 

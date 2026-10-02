@@ -59,6 +59,7 @@ class SiteRules {
     this.signIn,
     this.popstateNavigation = false,
     this.appLinks = const [],
+    this.searchBoxes = const [],
   });
 
   factory SiteRules.parse(String source) {
@@ -146,6 +147,10 @@ class SiteRules {
         for (final (i, a) in r.objects('appLinks', required: false).indexed)
           AppLink._fromJson(_Reader(a, 'appLinks[$i].')),
       ],
+      searchBoxes: [
+        for (final (i, s) in r.objects('searchBoxes', required: false).indexed)
+          SearchBox._fromJson(_Reader(s, 'searchBoxes[$i].')),
+      ],
       userAgent: r.enumValue(
         'userAgent',
         UserAgentMode.values,
@@ -180,6 +185,10 @@ class SiteRules {
   /// Links into the site's own app that open a page of the site instead.
   /// The app never opens other app links.
   final List<AppLink> appLinks;
+
+  /// Search boxes that only search in the site's own app, where Enter goes
+  /// to a page of the site instead.
+  final List<SearchBox> searchBoxes;
   final UserAgentMode userAgent;
   final List<Feature> features;
 
@@ -640,6 +649,37 @@ class AppLink {
       (reference) => found.group(int.parse(reference[1]!)) ?? '',
     );
   }
+}
+
+/// A search box that only searches in the site's own app, such as TikTok's,
+/// which does nothing when you press Enter. Pressing Enter in an element
+/// matching [input] goes to [to], where `$1` is what was typed; with
+/// [paths], only on pages whose path and query match that pattern.
+class SearchBox {
+  SearchBox({required this.input, required this.to, this.paths});
+
+  factory SearchBox._fromJson(_Reader r) {
+    final to = r.string('to');
+    if (!to.startsWith('/')) {
+      throw RulesFormatException('${r.path}to: must start with /');
+    }
+    for (final reference in groupReference.allMatches(to)) {
+      if (reference[1] != '1') {
+        throw RulesFormatException(
+          '${r.path}to: ${reference[0]} isn\'t the typed text, which is \$1',
+        );
+      }
+    }
+    return SearchBox(
+      input: r.string('input'),
+      to: to,
+      paths: r.optionalPattern('paths'),
+    );
+  }
+
+  final String input;
+  final String to;
+  final String? paths;
 }
 
 /// Reads typed fields and reports errors with the field's path.

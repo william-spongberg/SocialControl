@@ -220,6 +220,7 @@ class _DiagnosticsDialog extends StatelessWidget {
                     ...stats['hideByText'] as List,
                     ...stats['prune'] as List? ?? const [],
                     ...stats['keep'] as List? ?? const [],
+                    ...stats['searchBoxes'] as List? ?? const [],
                   ])
                     ListTile(
                       dense: true,

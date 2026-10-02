@@ -125,6 +125,35 @@ void main() {
       expect(off['keep'], isEmpty);
     });
 
+    test('passes search boxes through whatever features are on', () {
+      final json = jsonDecode(rulesJson()) as Map<String, dynamic>
+        ..['searchBoxes'] = [
+          {
+            'input': 'input[placeholder]',
+            'to': r'/search/user?q=$1',
+            'paths': '^/search',
+          },
+        ];
+      final rules = SiteRules.fromJson(json);
+      final engine =
+          jsonDecode(EngineConfig.build(rules, const {}).json)
+              as Map<String, dynamic>;
+      expect(engine['searchBoxes'], [
+        {
+          'id': 'searchBox0',
+          'input': 'input[placeholder]',
+          'to': r'/search/user?q=$1',
+          'paths': '^/search',
+        },
+      ]);
+      final plain =
+          jsonDecode(
+                EngineConfig.build(SiteRules.parse(rulesJson()), const {}).json,
+              )
+              as Map<String, dynamic>;
+      expect(plain['searchBoxes'], isEmpty);
+    });
+
     test('passes the session and signed-out routes through', () {
       final json = jsonDecode(rulesJson()) as Map<String, dynamic>
         ..['session'] = {

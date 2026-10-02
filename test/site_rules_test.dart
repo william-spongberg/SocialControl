@@ -1244,6 +1244,48 @@ void main() {
       );
     });
 
+    test('reads search boxes, whose target can only use the typed text', () {
+      final json = _json()
+        ..['searchBoxes'] = [
+          {
+            'input': 'input[placeholder]',
+            'to': r'/search/user?q=$1',
+            'paths': '^/search',
+          },
+        ];
+      final box = SiteRules.fromJson(json).searchBoxes.single;
+      expect(box.input, 'input[placeholder]');
+      expect(box.to, r'/search/user?q=$1');
+      expect(box.paths, '^/search');
+      expect(SiteRules.parse(rulesJson()).searchBoxes, isEmpty);
+
+      final rule = (json['searchBoxes'] as List)[0] as Map;
+      rule['to'] = r'/search/user?q=$2';
+      expect(
+        () => SiteRules.fromJson(json),
+        _formatError('searchBoxes[0].to: \$2 isn\'t the typed text'),
+      );
+      rule['to'] = r'https://x.example/?q=$1';
+      expect(
+        () => SiteRules.fromJson(json),
+        _formatError('searchBoxes[0].to: must start with /'),
+      );
+      rule
+        ..['to'] = r'/search/user?q=$1'
+        ..['paths'] = '(';
+      expect(
+        () => SiteRules.fromJson(json),
+        _formatError('searchBoxes[0].paths: invalid pattern'),
+      );
+      rule
+        ..remove('paths')
+        ..remove('input');
+      expect(
+        () => SiteRules.fromJson(json),
+        _formatError('searchBoxes[0].input'),
+      );
+    });
+
     test('reads prune rules limited to some pages', () {
       Map<String, dynamic> withPaths(String paths) => _json(
         features: [

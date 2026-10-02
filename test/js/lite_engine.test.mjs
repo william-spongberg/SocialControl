@@ -676,6 +676,81 @@ describe('in-page navigation', () => {
   });
 });
 
+describe('search boxes', () => {
+  const searchBoxes = [{ id: 'search', input: 'input[placeholder]', paths: '^/search(?:[/?]|$)', to: '/search/user?q=$1' }];
+  const routes = [{ id: 'fyp', match: '^/foryou', action: 'block', to: '/following', label: 'For You' }];
+
+  function press(window, input, init = {}) {
+    const event = new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true, ...init });
+    input.dispatchEvent(event);
+    return event;
+  }
+
+  function searchPage(extra = {}) {
+    return boot({
+      url: 'https://www.instagram.com/search',
+      body: '<input id="q" placeholder="Search"><input id="other">',
+      config: { searchBoxes, routes, ...extra },
+    });
+  }
+
+  test('go to the rules\' page for what was typed when you press Enter', () => {
+    const page = searchPage();
+    const { window, document } = page;
+    const siteKeys = [];
+    document.addEventListener('keydown', (event) => siteKeys.push(event.key));
+    const input = document.getElementById('q');
+    input.value = '  hawthorn fc ';
+    const event = press(window, input);
+    assert.equal(event.defaultPrevented, true);
+    assert.deepEqual(siteKeys, []);
+    assert.deepEqual(page.navigations, [['assign', '/search/user?q=hawthorn%20fc']]);
+    assert.deepEqual({ ...page.engine.stats().searchBoxes[0] }, { id: 'search', active: true, matches: 1 });
+  });
+
+  test('leave other keys, other text boxes, empty boxes and other pages alone', () => {
+    const page = searchPage();
+    const { window, document } = page;
+    const input = document.getElementById('q');
+    input.value = 'cats';
+    assert.equal(press(window, input, { key: 'a' }).defaultPrevented, false);
+    assert.equal(press(window, input, { isComposing: true }).defaultPrevented, false);
+    assert.equal(press(window, document.getElementById('other')).defaultPrevented, false);
+    input.value = ' ';
+    assert.equal(press(window, input).defaultPrevented, false);
+    input.value = 'cats';
+    window.history.pushState({}, '', '/someone');
+    assert.equal(press(window, input).defaultPrevented, false);
+    assert.deepEqual(page.navigations, []);
+  });
+
+  test('apply route rules to where the search goes', () => {
+    const page = searchPage({ searchBoxes: [{ ...searchBoxes[0], to: '/foryou?q=$1' }] });
+    const input = page.document.getElementById('q');
+    input.value = 'cats';
+    press(page.window, input);
+    assert.deepEqual(page.navigations, [['assign', '/following']]);
+    assert.deepEqual(page.messages.find((m) => m.type === 'blocked'), {
+      type: 'blocked',
+      label: 'For You',
+      path: '/foryou?q=cats',
+    });
+  });
+
+  test('skip a box with an invalid target or selector', () => {
+    const page = searchPage({
+      searchBoxes: [
+        { id: 'bad-to', input: 'input', to: 'https://x.example/?q=$1' },
+        { id: 'bad-input', input: 'input[', to: '/search/user?q=$1' },
+      ],
+    });
+    assert.deepEqual(Array.from(page.engine.stats().errors, (e) => e.id), ['bad-to', 'bad-input']);
+    const input = page.document.getElementById('q');
+    input.value = 'cats';
+    assert.equal(press(page.window, input).defaultPrevented, false);
+  });
+});
+
 describe('keep rules', () => {
   const keep = [{ id: 'tabs', marker: 'a[href="/direct/inbox/"]', paths: '^/direct/inbox/' }];
   const bar =

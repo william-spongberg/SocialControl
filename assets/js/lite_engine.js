@@ -24,7 +24,8 @@
 //   5. JSON.parse and Response.json are wrapped, and globals that pages
 //      assign their data to are trapped, so prune rules can delete data
 //      (such as injected story ads) before the page renders it.
-// Keep rules also put back a tab bar on pages where the site drops it.
+// Keep rules also put back a tab bar on pages where the site drops it, and
+// search box rules make Enter search where the site only searches in its app.
 // The app's shouldOverrideUrlLoading handles full page loads.
 //
 // `env` is only passed by tests, to observe full page navigations.
@@ -170,6 +171,17 @@ function liteEngine(input, env) {
       keep.push({ id: k.id, marker: k.marker, paths: paths.re, snapshot: null });
     });
 
+    var searchBoxes = [];
+    (raw.searchBoxes || []).forEach(function (s) {
+      var paths = regex(s.paths, s.id);
+      if (!paths.ok || !selector(s.input, s.id)) return;
+      if (typeof s.to !== 'string' || s.to.charAt(0) !== '/') {
+        errors.push({ id: s.id, error: 'Invalid target: ' + s.to });
+        return;
+      }
+      searchBoxes.push({ id: s.id, input: s.input, to: s.to, paths: paths.re });
+    });
+
     var session = Array.isArray(raw.session) && raw.session.length ? raw.session.slice() : null;
     return {
       hosts: raw.hosts || [],
@@ -177,6 +189,7 @@ function liteEngine(input, env) {
       session: session,
       signedIn: typeof raw.signedIn === 'boolean' ? raw.signedIn : null,
       keep: keep,
+      searchBoxes: searchBoxes,
       routes: routes,
       hide: hide,
       style: style,
@@ -479,6 +492,33 @@ function liteEngine(input, env) {
       event.stopImmediatePropagation();
       setTimeout(function () { go(target, false); }, 0);
     }
+  }
+
+  // Enter in a search box that the site only searches from in its own app
+  // (TikTok's does nothing) goes to the rules' page for what was typed.
+  function onKeyDown(event) {
+    onUserInput(event);
+    if (event.key !== 'Enter' || event.isComposing) return;
+    var box = searchBoxFor(event.target);
+    if (!box) return;
+    var text = normalizeText(event.target.value || '');
+    if (!text) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    var query = encodeURIComponent(text);
+    var target = box.to.replace(/\$1/g, function () { return query; });
+    var res = resolve(target);
+    if (!res.changed || !redirect(res, target, { replace: false, defer: false })) go(target, false);
+  }
+
+  function searchBoxFor(element) {
+    if (!element || typeof element.matches !== 'function') return null;
+    var path = currentPath();
+    for (var i = 0; i < config.searchBoxes.length; i++) {
+      var box = config.searchBoxes[i];
+      if ((!box.paths || box.paths.test(path)) && element.matches(box.input)) return box;
+    }
+    return null;
   }
 
   // ---------------------------------------------------------------- styles
@@ -928,6 +968,13 @@ function liteEngine(input, env) {
           matches: document.querySelectorAll('[' + KEPT + '="' + k.id + '"]').length,
         };
       }),
+      searchBoxes: config.searchBoxes.map(function (s) {
+        return {
+          id: s.id,
+          active: !s.paths || s.paths.test(path),
+          matches: document.querySelectorAll(s.input).length,
+        };
+      }),
     };
   }
 
@@ -950,7 +997,7 @@ function liteEngine(input, env) {
   hookHistory();
   window.addEventListener('popstate', onPopState, true);
   window.addEventListener('click', onClick, true);
-  window.addEventListener('keydown', onUserInput, true);
+  window.addEventListener('keydown', onKeyDown, true);
   window.addEventListener('flutterInAppWebViewPlatformReady', flushBridge);
   document.addEventListener('DOMContentLoaded', function () {
     ensureStyles();

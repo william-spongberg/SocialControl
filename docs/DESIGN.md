@@ -127,6 +127,7 @@ everything, so filtering is layered:
 |---|---|---|
 | CSS injected at document start | engine | tabs and links, before first paint (no flash) |
 | Capture-phase click listener | engine | links to blocked pages, before the site's router sees the click |
+| Capture-phase key listener | engine | Enter in a search box that only searches in the site's app (TikTok's), which the rules' `searchBoxes` send to a page of the site |
 | `pushState`/`replaceState` hooks, `popstate` listener | engine | navigation not started by a link, back/forward |
 | MutationObserver | engine | text-labelled content as the feed streams in |
 | `JSON.parse`/`Response.json` wrappers | engine | data injected into API responses (story ads, video ads, TikTok's For You videos after a shared one), before it renders |
