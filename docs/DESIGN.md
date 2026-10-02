@@ -190,7 +190,9 @@ redirects in a row with no tap or key press in between).
   script opens is a sign-in popup, such as Reddit's "Continue with
   Google". It opens over the site in a dialog and keeps its connection to
   the page that opened it, which signing in needs. It closes when it
-  finishes or goes somewhere the app opens elsewhere.
+  finishes or goes somewhere the app opens elsewhere. TikTok also opens
+  one to hand a search to its app; when the rules map where it goes to a
+  page of the site, the window closes and that page opens in the site.
 - A link to another site in the app opens there: a YouTube link in an
   Instagram bio switches to the app's YouTube, not the YouTube app.
 - Every other site opens in the system browser. Outbound-link redirectors

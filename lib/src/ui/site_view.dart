@@ -205,7 +205,9 @@ class _SiteViewState extends State<SiteView> {
   /// a script opens has no URL yet: that is a sign-in popup, such as
   /// Reddit's "Continue with Google", which reports back to the page that
   /// opened it. It opens in a dialog over the site, which closes when the
-  /// popup closes itself or goes somewhere the app opens elsewhere.
+  /// popup closes itself or goes somewhere the app opens elsewhere. TikTok
+  /// also opens one to hand a search to its app; the rules map that to a
+  /// page of the site, which opens here instead.
   Future<bool> _onCreateWindow(
     InAppWebViewController controller,
     CreateWindowAction action,
@@ -310,8 +312,16 @@ class _SiteViewState extends State<SiteView> {
         unawaited(_openExternally(url));
         onLeave?.call();
         return NavigationActionPolicy.CANCEL;
-      case NavRedirect(:final url, :final blockedLabel):
+      case NavRedirect(url: final target, :final blockedLabel):
         if (blockedLabel != null) _notify('$blockedLabel blocked');
+        if (onLeave != null && _policy.handsOff(url, decision)) {
+          // A window the page opened to hand off to the site's own app, as
+          // TikTok's search does: the page the rules map that to opens in
+          // the site instead.
+          onLeave();
+          _open(target);
+          return NavigationActionPolicy.CANCEL;
+        }
         if (!_guard.allow()) {
           // A redirect loop. Let a plain redirect through, but keep a block.
           return blockedLabel == null
@@ -319,7 +329,7 @@ class _SiteViewState extends State<SiteView> {
               : NavigationActionPolicy.CANCEL;
         }
         unawaited(
-          controller.loadUrl(urlRequest: URLRequest(url: WebUri.uri(url))),
+          controller.loadUrl(urlRequest: URLRequest(url: WebUri.uri(target))),
         );
         return NavigationActionPolicy.CANCEL;
     }

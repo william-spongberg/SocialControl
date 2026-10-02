@@ -133,6 +133,25 @@ void main() {
       );
       // Any other app link is dropped.
       expect(open('instagram://media?id=1'), isA<NavCancel>());
+
+      // A window the page opens with one hands off to the site.
+      bool handsOff(String url) {
+        final uri = Uri.parse(url);
+        return linkPolicy.handsOff(uri, open(url));
+      }
+
+      expect(handsOff('instagram://user?username=some.one'), isTrue);
+      expect(
+        handsOff(
+          'https://app.example/?deep=instagram%3A%2F%2Fuser%3Fusername%3Dreels',
+        ),
+        isTrue,
+      );
+      // Sign-in windows don't: they report back to the page that opened
+      // them, even when a route redirects them on the site.
+      expect(handsOff('https://accountscenter.instagram.com/'), isFalse);
+      expect(handsOff('https://www.instagram.com/reels/'), isFalse);
+      expect(handsOff('https://example.com/'), isFalse);
     });
 
     test('opens other sites and mail links outside the app', () {

@@ -84,6 +84,15 @@ class UrlPolicy {
     return NavOpenExternal(url);
   }
 
+  /// Whether a window the page opened, going to [url], hands off to the
+  /// site's own app, through an app link or a redirector that the rules map
+  /// to one of the site's pages, as TikTok's search does. The app then opens
+  /// that page in the site and closes the window.
+  bool handsOff(Uri url, NavDecision decision) =>
+      decision is NavRedirect &&
+      !rules.isSiteHost(url.host) &&
+      rules.isSiteHost(decision.url.host);
+
   /// An app link opens the page of the site that the rules map it to, and is
   /// otherwise dropped: the app never opens the site's own app.
   NavDecision _appLink(Uri url, bool signedIn) {
