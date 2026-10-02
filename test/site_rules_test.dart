@@ -149,6 +149,14 @@ void main() {
         '/?variant=following',
       );
       expect(resolver.resolve('/?variant=favorites').changed, isFalse);
+      // Other feeds are the algorithmic one.
+      for (final path in ['/?variant=home', '/?variant=for_you']) {
+        expect(
+          resolver.resolve(path).path,
+          '/?variant=following',
+          reason: path,
+        );
+      }
     });
 
     test('tell signed in from signed out by the ds_user_id cookie', () {

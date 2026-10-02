@@ -103,10 +103,10 @@
       "enabledByDefault": true,
       "routes": [
         {
-          "match": "^/(?:\\?(?!variant=).*)?$",
+          "match": "^/(?:\\?(?!variant=(?:following|favorites)(?:&|$)).*)?$",
           "action": "redirect",
           "to": "/?variant=following",
-          "note": "Home with no feed chosen, including /?deoia=1, where Instagram lands after logging in. Leaves /?variant=... alone, so the Favorites feed still works."
+          "note": "Home showing any feed but Following and Favorites: with no feed chosen, including /?deoia=1, where Instagram lands after logging in, and with another one, such as /?variant=home, which is the algorithmic feed (checked signed in)."
         }
       ]
     },
